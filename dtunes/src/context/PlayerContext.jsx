@@ -3,6 +3,20 @@ import { createContext, useEffect, useRef, useState } from "react";
 import axios from 'axios';
 import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
+
+function shuffleArray(arr) {
+    'Shuffles array in place'
+
+    for (let i = arr.length; i > 0; i--) {
+        let randIndex = Math.floor(Math.random() * i);
+
+        let temp = arr[i - 1];
+        arr[i - 1] = arr[randIndex];
+        arr[randIndex] = temp;
+    }
+}
+
+
 export const PlayerContext = createContext();
 
 export default function PlayerContextProvider({ children, backendUrl }) {
@@ -10,7 +24,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     const seekBgRef = useRef();
     const seekBarRef = useRef();
 
-    // const [track, setTrack] = useState(songsData[0]);
     const [track, setTrack] = useState({});
     const [playing, setPlaying] = useState(false);
 
@@ -34,6 +47,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         filter: '',
     });
     const curLocation = useLocation();
+    const [withinPlaylist, setWithinPlaylist] = useState(false);
 
     async function getSongs() {
         let response;
@@ -41,41 +55,48 @@ export default function PlayerContextProvider({ children, backendUrl }) {
             response = await axios.get(`${backendUrl}/api/songs`)
             if (response.data.success) {
                 let songsAvailable = response.data.songs;
+                shuffleArray(songsAvailable);
 
                 //search:
                 if (searchQuery.term) {
                     //lowercase both
                     songsAvailable = songsAvailable.filter(song => song.name.toLowerCase().indexOf(searchQuery.term.toLowerCase()) !== -1)
                 }
-                
-                try{
+
+                try {
                     // within a playlist:
                     let playlistIndex = curLocation.pathname.indexOf('playlist');
-                    if(playlistIndex!==-1){
-                        let playlistId = curLocation.pathname.slice(playlistIndex+'playlist'.length+1);
+                    if (playlistIndex !== -1) {
+                        let playlistId = curLocation.pathname.slice(playlistIndex + 'playlist'.length + 1);
                         //remove any unwanted extra stuff
                         let extraSlashIndex = playlistId.indexOf('/');
-                        if (extraSlashIndex!==-1){
+                        if (extraSlashIndex !== -1) {
                             playlistId = playlistId.slice(0, extraSlashIndex)
                         }
                         let playlistName = playlistsData.find(p => p._id === playlistId)
 
-                        if(playlistName){
+                        if (playlistName) {
                             playlistName = playlistName.name;
                             songsAvailable = songsAvailable.filter(s => s.playlist === playlistName);
+                            setWithinPlaylist(true);
                         }
-                        
-                        // songsAvailable = songsAvailable.filter()
-    
+
                     }
-                }catch(err){
+                    else {
+                        setWithinPlaylist(false);
+                    }
+                } catch (err) {
                     console.log('Error filtering songs for playlist:', err);
                 }
 
                 setSongsData(songsAvailable);
-                setTrack(t => {
-                    if (!t && songsAvailable) return songsAvailable[0];
-                });
+
+                //Only if track is not set, set it to the first available song
+                if (!Object.keys(track).length) {
+                    setTrack(t => {
+                        if (songsAvailable) return songsAvailable[0];
+                    })
+                }
             }
             else {
                 toast.warn('Couldn\'t get songs. Please Reload!')
@@ -111,7 +132,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     useEffect(() => {
         getSongs();
-        // getPlaylists();
     }, [searchQuery])
 
     useEffect(() => {
@@ -131,9 +151,15 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     }
 
-    function play() {
-        audioRef.current.play();
-        setPlaying(true);
+    async function play() {
+        try {
+            //if songs data have not yet been filtered, but in playlist: 
+            if (curLocation.pathname.indexOf('playlist') !== -1 && !withinPlaylist) getSongs();
+            const result = await audioRef.current.play()
+            setPlaying(true);
+        } catch (err) {
+            setPlaying(false);
+        }
 
     }
 
@@ -148,7 +174,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
             const fractionTime = (e.clientX - X) / width;
             audioRef.current.currentTime = fractionTime * audioRef.current.duration;
         }
-        catch(err){
+        catch (err) {
             console.log(err);
         }
     }
@@ -170,7 +196,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     async function playWithId(id) {
-        // await setTrack(songsData[id]);
         await setTrack(songsData.find(song => song._id === id))
         // play();
     }
@@ -188,7 +213,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     async function next() {
 
         songsData.map((song, idx) => {
-            if (song._id === track._id && idx < songsData.length) {
+            if (song._id === track._id && idx < songsData.length - 1) {
                 setTrack(songsData[idx + 1]);
             }
         })
@@ -198,18 +223,24 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     useEffect(() => {
         try {
             if (track) {
-                play();
+                play()
             }
         } catch (err) {
             console.log(err);
         }
     }, [track]);
 
+    //first time pause song:
+    useEffect(() => {
+        pause();
+    }, []);
+
+    // console.log('track:',track, 'isplaying:', playing);
 
     useEffect(() => {
         const audio = audioRef.current;
         audio.ontimeupdate = () => {
-            try{
+            try {
 
                 seekBarRef.current.style.width = `${audio.currentTime / audio.duration * 100}%`
                 setTime({
@@ -222,8 +253,8 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         minute: Math.floor(audio.duration / 60),
                     }
                 })
-            }catch(err){
-                console.log('playing audio error:', err);
+            } catch (err) {
+                console.log('ontimeUpdate error:', err);
             }
 
         }

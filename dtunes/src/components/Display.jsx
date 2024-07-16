@@ -6,6 +6,7 @@ import { useContext } from 'react'
 import { PlayerContext } from '../context/PlayerContext'
 import Navbar from './Navbar'
 import { ToastContainer } from 'react-toastify'
+
 // import { playlistsData } from '../assets/user/assets';
 
 export default function Display({setCollapsedSidebar}) {

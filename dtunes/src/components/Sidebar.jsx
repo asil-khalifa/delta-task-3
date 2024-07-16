@@ -32,7 +32,7 @@ export default function Sidebar({ collapsed = true }) {
     }
 
     return (
-        <div className={`w-[75%] lg:w-[25%] h-full p-2 ${collapsed && 'hidden'} absolute lg:static lg:flex flex-col gap-2 text-white`}>
+        <div className={`w-[75%] sm:w-[50%] lg:w-[25%] h-full p-2 ${collapsed && 'hidden'} absolute lg:static lg:flex flex-col gap-2 text-white`}>
             <div className="bg-[#121212] h-[10%] rounded flex flex-col justify-around">
 
                 <div onClick={() => navigate('/')} className="hover:bg-[#434343] flex items-center gap-3 pl-8 py-2 cursor-pointer">

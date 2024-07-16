@@ -7,8 +7,7 @@ import { useContext } from "react";
 import { PlayerContext } from "../context/PlayerContext";
 
 export default function Home() {
-    const { songsData, playlistsData } = useContext(PlayerContext);
-
+    const { songsData, playlistsData, track } = useContext(PlayerContext);
     return (
         <>
             {/* <Navbar /> */}
@@ -21,8 +20,8 @@ export default function Home() {
 
             <div className="mb-4">
                 <h1 className="my-5 font-bold text-2xl">Songs:</h1>
-                <div className="flex overflow-auto">
-                    {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} />)}
+                <div className="flex flex-wrap justify-evenly overflow-auto">
+                    {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} currentlyPlaying={track._id && track._id === sd._id} />)}
                 </div>
             </div>
         </>

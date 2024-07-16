@@ -1,36 +1,14 @@
-import { Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
 import './App.css'
-// import Sidebar from './components/Sidebar'
-// import Player from './components/Player'
-// import Display from './components/Display'
-// import { useContext } from 'react'
-// import { PlayerContext } from './context/PlayerContext'
-import Normal from './components/Normal'
 import NormalWithContext from './components/NormalWithContext'
 import OtherViewsMain from './otherViews/OtherViewsMain'
-import { useContext } from 'react'
 
 function App() {
     
     return (
         <>
-            {/* <div className='h-screen bg-black'>
-                {songsData.length !== 0
-                    ? <>
-                        <div className='h-[90%] flex'>
-                            <Sidebar />
-                            <Display />
-                        </div>
-                        <Player />
-                    </> :
-                    null
-                }
-                <audio ref={audioRef} preload='auto' src={track?track.file:''}></audio>
-            </div> */}
             <Routes>
-                {/* <Route path='*' element={<Normal songsData={songsData} audioRef={audioRef} track={track} />} /> */}
-                {/* <Route path='*' element={<Normal/>} /> */}
 
                 <Route path='/playlists/new/*' element={<OtherViewsMain  requestedPath='/playlists/new' />}/>
                 <Route path='/songs/new/*' element={<OtherViewsMain requestedPath='/songs/new' />}/>
@@ -40,7 +18,6 @@ function App() {
                 <Route path='*' element={<NormalWithContext/>} />
 
             </Routes>
-            {/* <Normal songsData={songsData} audioRef={audioRef} track={track}/> */}
         </>
     )
 }

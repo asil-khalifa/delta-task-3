@@ -33,8 +33,8 @@ export default function LikesDislikes({ likes, dislikes, songId }) {
 
     return (
         <div className="flex gap-2 mt-1">
-            <button onClick={(e) => handleLike(e)} className={`bg-green-950 rounded-xl px-1`}>{likes.length} Likes</button>
-            <button onClick={(e) => handleDislike(e)} className={`bg-red-950 rounded-xl px-1`}>{dislikes.length} Dislikes</button>
+            <button onClick={(e) => handleLike(e)} className={`bg-green-950 rounded-xl px-1`}>{likes.length} Like{likes.length!==1 && 's'}</button>
+            <button onClick={(e) => handleDislike(e)} className={`bg-red-950 rounded-xl px-1`}>{dislikes.length} Dislike{dislikes.length!==1 && 's'}</button>
         </div>
     )
 }
