@@ -45,10 +45,10 @@ export default function Navbar({setCollapsedSidebar}){
 
                 {!loggedIn && <a href="/users/new?isArtist=false&newUser=true"><p className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer hidden md:block">Login/Register</p></a>}
                 {!loggedIn && <a href="/users/new?isArtist=false&newUser=true"><p className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer block md:hidden">Login</p></a>}
-
+                
                 {loggedIn && <p onClick={() => logout()} className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer block">Logout</p>}
-
-                {loggedIn && <p onClick={() => setCollapsedSidebar(s => !s)} className={`border border-green-700 bg-white text-black w-8 h-8 rounded-full flex items-center justify-center`}>{user?user.name[0].toUpperCase():'A'}</p>}
+                {/* bg-[#ffffff] */}
+                {loggedIn && <p onClick={() => setCollapsedSidebar(s => !s)} style={{backgroundColor:  user.profileColor}} className={`border border-green-700 text-black w-8 h-8 rounded-full flex items-center justify-center`}>{user?user.name[0].toUpperCase():'A'}</p>}
                 {!loggedIn && <img onClick={() => setCollapsedSidebar(s => !s)} className="w-8 h-8 lg:hidden" src={assets.threeLines}></img>}
 
             </div>

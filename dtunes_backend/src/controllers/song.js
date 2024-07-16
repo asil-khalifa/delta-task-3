@@ -1,58 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import songModel from '../models/song.js'
-
-// import connectCloudinary from '../config/cloudinary.js';
-
-// cloudinary.config()
-
-// async function uploadTrial(path1, path2, options1, options2){
-//     try{
-//         const audioUpload = await cloudinary.uploader.upload(path1, options1)
-//         const imageUpload = await cloudinary.uploader.upload(path2, options2)
-
-//         return audioUpload, imageUpload
-//     }
-//     catch(e){
-//         console.log(e);
-//         return false;
-//     }
-// }
-
-// async function addSong(req, res){
-
-//     let tries = 0;
-//     const {name, desc, playlist} = req.body;
-//     const {image, audio} = req.files;
-
-//     const imageFile = image[0];
-//     const audioFile = audio[0];
-//     console.log(name, desc, playlist, imageFile.path, audioFile.path);
-//     let success = false;
-
-//     while(tries<=5){
-
-//         let resp = await uploadTrial(audioFile.path, imageFile.path, {resource_type: 'video'}, {resource_type: 'image'})
-
-//         if (resp){
-//             audioUpload, imageUpload = resp;
-//             success = true;
-//             break;
-//         }
-//         else{
-//             tries++;
-//             console.log('Trying', tries)
-//         }
-//     }
-
-//     if (success){
-//         console.log(audioUpload, imageUpload);
-//         res.send('Sucess');
-//     }
-//     else{
-//         res.send('error');
-//     }
-
-// }
+import userModel from '../models/user.js';
 
 async function addSong(req, res) {
     const { name, desc, playlist } = req.body;
@@ -111,27 +59,31 @@ async function removeSong(req, res) {
     }
 }
 
-// async function seedSongLikes(req, res){
-//     await songModel.updateMany({}, {$set: {likes: [], dislikes: []}});
-//     res.send('done');
-// }
 
 //If user already liked, removes it, else adds like:
 async function addLike(req, res){
     try{
         const {userId, songId} = req.body;
         const song = await songModel.findById(songId);
-
+        const user = await userModel.findById(userId);
 
         const alreadyLiked = song.likes.filter((likeId) => likeId.equals(userId))
         const wasLiked = alreadyLiked.length>0;
+
+        //update id's both in user and the song:
         if(wasLiked){
             song.likes = song.likes.filter(likeId => !likeId.equals(userId));
             await song.save();
+
+            user.likedSongs = user.likedSongs.filter(sId => !sId.equals(songId));
+            await user.save();
         }
         else{
             song.likes.push(userId);
             await song.save();
+
+            user.likedSongs.push(songId);
+            await user.save();
             
         }
 
@@ -148,17 +100,24 @@ async function addDislike(req, res){
     try{
         const {userId, songId} = req.body;
         const song = await songModel.findById(songId);
+        const user = await userModel.findById(userId);
 
         const alreadyDisliked = song.dislikes.filter((likeId) => likeId.equals(userId))
         const wasDisliked = alreadyDisliked.length>0;
+
         if(wasDisliked){
             song.dislikes = song.dislikes.filter(likeId => !likeId.equals(userId));
             await song.save();
+
+            user.dislikedSongs = user.dislikedSongs.filter(sId => !sId.equals(songId));
+            await user.save();
         }
         else{
             song.dislikes.push(userId);
             await song.save();
             
+            user.dislikedSongs.push(songId);
+            await user.save();
         }
 
         res.json({success: true, wasDisliked});
@@ -167,4 +126,18 @@ async function addDislike(req, res){
         console.log(err);
     }
 }
+
+// async function seedUserLikes(req, res){
+//     const response = await userModel.updateMany({}, {$set: {likedSongs: [], dislikedSongs: []}});
+//     console.log(response);
+//     res.send('done');
+// }
+
+// async function seedSongLikes(req, res){
+//     await songModel.updateMany({}, {$set: {likes: [], dislikes: []}});
+//     res.send('done');
+// }
+
 export { addSong, listSong, removeSong, addLike, addDislike};
+
+// export {seedSongLikes};

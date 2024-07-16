@@ -5,8 +5,9 @@ import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
 
 function shuffleArray(arr) {
-    'Shuffles array in place'
+    'Shuffles array AND RETURNS'
 
+    arr = [...arr];
     for (let i = arr.length; i > 0; i--) {
         let randIndex = Math.floor(Math.random() * i);
 
@@ -14,6 +15,7 @@ function shuffleArray(arr) {
         arr[i - 1] = arr[randIndex];
         arr[randIndex] = temp;
     }
+    return arr;
 }
 
 
@@ -49,18 +51,24 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     const curLocation = useLocation();
     const [withinPlaylist, setWithinPlaylist] = useState(false);
 
+    //See Normal.jsx, this helps to override songsData being empty 
+    const [showNoSongs, setShowNoSongs] = useState(false);
+
     async function getSongs() {
         let response;
         try {
             response = await axios.get(`${backendUrl}/api/songs`)
             if (response.data.success) {
                 let songsAvailable = response.data.songs;
-                shuffleArray(songsAvailable);
+                // shuffleArray(songsAvailable);
 
                 //search:
                 if (searchQuery.term) {
                     //lowercase both
                     songsAvailable = songsAvailable.filter(song => song.name.toLowerCase().indexOf(searchQuery.term.toLowerCase()) !== -1)
+
+                    if (!songsAvailable.length) setShowNoSongs(true);
+                    else setShowNoSongs(false);
                 }
 
                 try {
@@ -73,12 +81,17 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         if (extraSlashIndex !== -1) {
                             playlistId = playlistId.slice(0, extraSlashIndex)
                         }
-                        let playlistName = playlistsData.find(p => p._id === playlistId)
+                        // let playlistName = playlistsData.find(p => p._id === playlistId)
 
-                        if (playlistName) {
-                            playlistName = playlistName.name;
-                            songsAvailable = songsAvailable.filter(s => s.playlist === playlistName);
-                            setWithinPlaylist(true);
+                        // if (playlistName) {
+                        //     playlistName = playlistName.name;
+                        //     songsAvailable = songsAvailable.filter(s => s.playlist === playlistName);
+                        //     setWithinPlaylist(true);
+                        // }
+
+                        let playlistData = playlistsData.find(p => p._id === playlistId);
+                        if(playlistData){
+                            songsAvailable = songsAvailable.filter(song => playlistData.songs.find(sId => sId === song._id))
                         }
 
                     }
@@ -190,8 +203,10 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         seekAudio,
         playWithId,
         previous, next,
-        songsData, playlistsData,
+        songsData, setSongsData,
+        playlistsData,
         searchQuery, handleSearch,
+        showNoSongs, setShowNoSongs
 
     }
 
@@ -201,7 +216,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     async function previous() {
-
+        console.log('hi');
         songsData.map((song, idx) => {
             if (song._id === track._id && idx > 0) {
                 setTrack(songsData[idx - 1]);
@@ -211,7 +226,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     async function next() {
-
+        console.log('next', songsData);
         songsData.map((song, idx) => {
             if (song._id === track._id && idx < songsData.length - 1) {
                 setTrack(songsData[idx + 1]);

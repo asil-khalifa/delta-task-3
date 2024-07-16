@@ -1,0 +1,114 @@
+import axios from "axios";
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Navbar from "../components/Navbar";
+import ListOfSongs from "../components/ListOfSongs";
+
+export default function EditPlaylist({ backendUrl }) {
+    const dtunesStorage = localStorage.getItem('dtunesStorage');
+    let loggedIn = false, user = {};
+
+    if (dtunesStorage){
+        ({loggedIn, user} = JSON.parse(dtunesStorage));
+    }
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    function getPlaylistId() {
+        let pIdx = location.pathname.indexOf('playlists/');
+        if (pIdx === -1) navigate('/');
+
+        pIdx += 'playlists/'.length;
+
+        let playlistId = location.pathname.slice(pIdx);
+        pIdx = playlistId.indexOf('/add-song');
+        if (pIdx === -1) navigate('/');
+
+        playlistId = playlistId.slice(0, pIdx);
+
+        return playlistId;
+    }
+
+    const playlistId = getPlaylistId();
+
+    const [includedSongs, setIncludedSongs] = useState([]);
+    const [excludedSongs, setExcludedSongs] = useState([]);
+
+    async function fetchSongs() {
+        try {
+            const response = await axios.get(`${backendUrl}/api/playlists/${playlistId}/songs`)
+            if (response.data.success) {
+                setIncludedSongs(response.data.songs);
+                setExcludedSongs(response.data.excludedSongs);
+            }
+            else {
+                toast.warn('Unable to retrieve songs. Please reload page');
+            }
+        } catch (e) {
+            toast.error('Error occured. Please reload page');
+
+        }
+    }
+
+    useEffect(() => {
+        fetchSongs();
+    }, [])
+
+    async function removeSong(id) {
+        try {
+            const response = await axios.delete(`${backendUrl}/api/playlists/${playlistId}/${id}?userId=${user._id}`)
+
+            if (response.data.success) {
+                toast.success('Removed Song Successfully!');
+                fetchSongs();
+            }
+            else if (response.data.errorCode === 'userNotAllowed'){
+                toast.error('You are not allowed to edit this playlist!');
+            }
+            else if (response.data.errorCode === 'userNotExists'){
+                toast.warn('Couldn\'t remove song. Are you logged in?')
+            }
+            else {
+                toast.warn('Couldn\'t remove song. Try again!')
+            }
+        } catch (e) {
+            toast.error('Error removing song. Try again!')
+        }
+    }
+
+    async function addSong(id) {
+        try {
+            const response = await axios.post(`${backendUrl}/api/playlists/${playlistId}/${id}`, {userId: user._id})
+
+            if (response.data.success) {
+                toast.success('Added Song Successfully!');
+                fetchSongs();
+            }
+            else if (response.data.errorCode === 'userNotAllowed'){
+                toast.error('You are not allowed to edit this playlist!');
+            }
+            else if (response.data.errorCode === 'userNotExists'){
+                toast.warn('Couldn\'t remove song. Are you logged in?')
+            }
+            else if (response.data.errorCode === 'alreadyAdded'){
+                toast.info('Already added. Reload page to reflect!')
+            }
+            else {
+                console.log(response);
+                toast.warn('Couldn\'t add song. Try again!')
+            }
+        } catch (e) {
+            toast.error('Error adding song. Try again!')
+        }
+    }
+
+    return (
+        <>
+            <Navbar pageHeading="Add song to playlist" />
+            <ListOfSongs heading='Songs in Playlist' lastOption='Remove' color='red' data={includedSongs} clickFunc={removeSong} />
+            <ListOfSongs heading='Other Songs' lastOption='Add' color='green' data={excludedSongs} clickFunc={addSong} />
+        </>
+    )
+}

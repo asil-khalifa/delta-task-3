@@ -6,6 +6,7 @@ import { useContext } from 'react'
 import { PlayerContext } from '../context/PlayerContext'
 import Navbar from './Navbar'
 import { ToastContainer } from 'react-toastify'
+import DisplayLikedSongs from './DisplayLikedSongs'
 
 // import { playlistsData } from '../assets/user/assets';
 
@@ -13,6 +14,7 @@ export default function Display({setCollapsedSidebar}) {
     const { playlistsData } = useContext(PlayerContext);
 
     const displayRef = useRef();
+
     const location = useLocation();
 
     //find playlist:
@@ -44,8 +46,9 @@ export default function Display({setCollapsedSidebar}) {
             <ToastContainer/>
             <Navbar setCollapsedSidebar={setCollapsedSidebar}/>
             <Routes>
-                <Route path='*' element={<Home />} />
+                <Route path='/liked-songs' element={<DisplayLikedSongs/>}/>
                 <Route path='/playlist/:id' element={<DisplayPlaylist />} />
+                <Route path='*' element={<Home />} />
             </Routes>
         </div>
     )

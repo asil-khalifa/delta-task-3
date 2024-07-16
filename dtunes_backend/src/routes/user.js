@@ -1,6 +1,6 @@
 //ROUTES:
 
-import { addUser, authenticateUser, getUserDetails, listUser } from "../controllers/user.js";
+import { addUser, authenticateUser, getLikedSongs, getUserDetails, listUser } from "../controllers/user.js";
 import express, { urlencoded } from 'express'
 
 const userRouter = express.Router();
@@ -14,5 +14,7 @@ userRouter.get('/', listUser);
 userRouter.post('/login', authenticateUser);
 
 userRouter.get('/:id', getUserDetails);
+
+userRouter.get('/:id/liked-songs', getLikedSongs)
 
 export default userRouter;

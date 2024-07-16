@@ -17,9 +17,16 @@ const playlistSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isPublic: {
+        type: Boolean,
+        required: true,
+    },
+    songs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Song',
+    }],
 })
 
-// const playlistModel = mongoose.models.Playlist || mongoose.model('Playlist', playlistSchema);
 const playlistModel = mongoose.model('Playlist', playlistSchema, 'playlists');
 
 export default playlistModel;

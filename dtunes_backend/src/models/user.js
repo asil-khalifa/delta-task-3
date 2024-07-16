@@ -28,7 +28,16 @@ const userSchema = new mongoose.Schema({
     profileColor: {
         type: String,
         required: true,
-    }
+    },
+    likedSongs:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Song',
+    }],
+    dislikedSongs:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Song',
+    }],
+    
 
 })
 

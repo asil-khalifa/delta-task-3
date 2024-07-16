@@ -50,7 +50,7 @@ export default function Sidebar({ collapsed = true }) {
                     </div>
                 </div>
 
-                <SidebarItem clickFunc={clickCreatePlaylist} heading='Create Playlist+' paragraph='Create once. Share with friends. Listen anywhere.' buttonText='Create Playlist' />
+                <SidebarItem clickFunc={clickCreatePlaylist} heading='Create Playlist+' paragraph='Add your favourite songs to a playlist and listen to them anytime!' buttonText='Create Playlist' />
                 {!loggedIn && <SidebarItem clickFunc={clickAddSong} heading='Publish Song' paragraph='Register with an artist account to publish your own songs!' buttonText='Create Artist Account' />}
                 {loggedIn && user.isArtist && <SidebarItem clickFunc={clickAddSong} heading='Publish Songs' paragraph='As an artist, you can share your songs with the world to see!' buttonText='Publish song' />}
                 {/* <SidebarItem heading='Friend 1' paragraph='Listening to Song 1' buttonText='Listen Together'/> */}

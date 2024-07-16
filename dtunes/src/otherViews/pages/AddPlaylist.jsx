@@ -2,11 +2,14 @@ import { useState } from "react";
 import { assets } from "../assets/artist/assets";
 import { toast } from "react-toastify";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 function randomColor() {
     const colors = ['#744210', '#234e52', '#44337a', '#742a2a', '#22543d', '#2a4365'];
     return colors[Math.floor(Math.random() * colors.length)]
 }
+
+
 
 export default function AddPlaylist({ backendUrl }) {
     const [image, setImage] = useState(false);
@@ -14,8 +17,16 @@ export default function AddPlaylist({ backendUrl }) {
     const [desc, setDesc] = useState('');
     const [bgColor, setBgColor] = useState(randomColor);
 
+    const dtunesStorage = localStorage.getItem('dtunesStorage');
+    let loggedIn = false, user = {};
+
+    if (dtunesStorage) {
+        ({ loggedIn, user } = JSON.parse(dtunesStorage));
+    }
+
     async function submitHandler(e) {
         e.preventDefault();
+        if(!loggedIn) return;
 
         try {
             const formData = new FormData();
@@ -23,6 +34,10 @@ export default function AddPlaylist({ backendUrl }) {
             formData.append('name', name);
             formData.append('desc', desc);
             formData.append('bgColor', bgColor);
+            //set playlist to public if user is artist only
+            formData.append('isPublic', user.isArtist);
+            //userId is passed so that only this user will be able to modify this playlist
+            formData.append('userId', user._id);
 
             const response = await toast.promise(
                 axios.post(`${backendUrl}/api/playlists`, formData),
@@ -52,6 +67,8 @@ export default function AddPlaylist({ backendUrl }) {
     }
 
     return (
+        <>
+        <Navbar pageHeading="Create new Playlist"/>
         <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600">
             <div className="flex flex-col gap-4">
                 <p>Upload Image</p>
@@ -74,9 +91,11 @@ export default function AddPlaylist({ backendUrl }) {
             <div className="flex flex-col gap-3">
                 <p>Background Color:</p>
                 <input onChange={(e) => setBgColor(e.target.value)} value={bgColor} type="color" />
+                <p className="mt-2">Note: This playlist will be {user.isArtist?'public because you\'re an artist':'private because you\'re not an artist'}</p>
             </div>
 
             <button className="text-base bg-green-600 hover:bg-green-700 active:bg-green-800 text-white cursor-pointer px-6 py-3 rounded-full" type="submit">Add</button>
         </form>
+        </>
     )
 }

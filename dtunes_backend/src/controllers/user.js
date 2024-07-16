@@ -83,4 +83,22 @@ async function getUserDetails(req, res){
     
 }
 
-export { addUser, listUser, authenticateUser, getUserDetails };
+async function getLikedSongs(req, res){
+    try{
+
+        const {id} = req.params;
+        const user = await userModel.findById(id).populate('likedSongs');
+    
+        if (!user) return res.json({success: false, errorCode: 'idNotExist'});
+
+        return res.json({success: true, likedSongs: user.likedSongs});
+
+    }catch(err){
+        console.log(err);
+        res.json({success: false, errorCode: 'unknownError', error: err});
+    }
+
+
+}
+
+export { addUser, listUser, authenticateUser, getUserDetails, getLikedSongs };

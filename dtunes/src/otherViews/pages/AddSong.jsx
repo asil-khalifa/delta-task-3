@@ -3,6 +3,7 @@ import { assets } from "../assets/artist/assets";
 import axios from 'axios';
 import { toast } from "react-toastify";
 import { v4 as uuid } from 'uuid';
+import Navbar from "../components/Navbar";
 
 export default function AddSong({ backendUrl }) {
     const [image, setImage] = useState(false);
@@ -75,6 +76,8 @@ export default function AddSong({ backendUrl }) {
     }, []);
 
     return (
+        <>
+        <Navbar pageHeading="Publish New Song"/>
         <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600" action="">
             <div className="flex gap-8">
                 <div className="flex flex-col gap-4">
@@ -116,5 +119,6 @@ export default function AddSong({ backendUrl }) {
 
             <button className="text-base bg-green-600 hover:bg-green-700 active:bg-green-800 text-white cursor-pointer px-6 py-3 rounded-full" type="submit">Add</button>
         </form>
+        </>
     )
 }

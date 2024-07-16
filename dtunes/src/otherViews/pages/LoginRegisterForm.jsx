@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import LoginNavbar from "../components/LoginNavbar";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 
 export default function LoginRegisterForm({ backendUrl, activated }) {
@@ -12,6 +13,12 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
 
     let isArtist = activated[4];
     let newUser = activated[5];
+
+    let pageHeading = 'Login & Registration'
+    if (activated[0]) pageHeading = 'User Registration';
+    else if (activated[1]) pageHeading = 'User Login';
+    else if (activated[2]) pageHeading = 'Artist Registration';
+    else if (activated[3]) pageHeading = 'Artist Login';
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -72,7 +79,7 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
                 isArtist
             }
         }
-        else{
+        else {
             formData = {
                 username,
                 password,
@@ -81,15 +88,15 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
 
         }
 
-        if (newUser){
+        if (newUser) {
             try {
-    
+
                 const response = await axios.post(`${backendUrl}/api/users`, formData);
                 if (response.data.success) {
                     toast.success('Your account is now created!');
                     resetForm();
                     console.log(response);
-                    localStorage.setItem('dtunesStorage', JSON.stringify({loggedIn: true, user: response.data.user}))
+                    localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user }))
                     navigate('/');
                 }
                 else {
@@ -98,37 +105,37 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
                     }
                     toast.warn('Issue in your form. Try again!');
                 }
-    
+
             } catch (err) {
                 console.log(err);
                 toast.error('Some error occured! Try again!')
             }
         }
 
-        else{
-            try{
+        else {
+            try {
 
                 const response = await axios.post(`${backendUrl}/api/users/login`, formData);
-                if (response.data.success){
+                if (response.data.success) {
                     toast.success('Successfully logged in!');
                     resetForm();
 
-                    localStorage.setItem('dtunesStorage', JSON.stringify({loggedIn: true, user: response.data.user}))
+                    localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user }))
                     navigate('/');
                 }
-                else{
-                    if (response.data.errorCode === 'usernameNotExist'){
+                else {
+                    if (response.data.errorCode === 'usernameNotExist') {
                         toast.warn('Username does not exist!');
                     }
-                    else if (response.data.errorCode === 'invalidCredentials'){
+                    else if (response.data.errorCode === 'invalidCredentials') {
                         toast.warn('Invalid Credentials');
                     }
-                    else{
+                    else {
                         toast.warn('Some error occured. Try again!');
                         console.log(response);
                     }
                 }
-            }catch(err){
+            } catch (err) {
                 toast.error('Some error occured, try again later');
                 console.log(response, err);
             }
@@ -137,6 +144,7 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
 
     return (
         <>
+            <Navbar pageHeading={pageHeading} />
             <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600" action="">
 
                 <InputBox onChangeSet={setUsername} value={username} placeholder="Enter username" inputType="text" label='Enter Username:' />

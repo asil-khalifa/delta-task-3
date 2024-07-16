@@ -1,64 +1,58 @@
 import { useParams } from "react-router-dom";
-import Navbar from "./Navbar";
-// import { playlistsData, assets, songsData } from "../assets/user/assets";
 import { assets } from "../assets/user/assets";
 import { v4 as uuid } from 'uuid'
 import { useContext } from "react";
 import { PlayerContext } from "../context/PlayerContext";
 import { useState } from "react";
 import { useEffect } from "react";
-import LikesDislikes from "./LikesDislikes";
+import PlaylistSong from "./PlaylistSong";
+import PlaylistSongHeading from './PlaylistSongHeading'
+import PlaylistCover from "./PlaylistCover";
 
 export default function DisplayPlaylist({ }) {
     const { id } = useParams();
-    const { playWithId, playlistsData, songsData, track } = useContext(PlayerContext);
-    // const playlistData= playlistsData[id];
+    const { playWithId, playlistsData, songsData, track, setShowNoSongs } = useContext(PlayerContext);
+
     const [playlistData, setPlaylistData] = useState('');
+
+    // let playlistSongs;
+    const [playlistSongs, setPlaylistSongs] = useState([]);
+
     useEffect(() => {
         setPlaylistData(playlistsData.find(playlist => playlist._id === id))
     }, [])
 
-    return playlistData ? (
+    useEffect(() => {
+        try {
+
+            console.log('sd', songsData);
+            let ps = songsData.filter(song => {
+                // console.log(song._id === playlistData.songs[0], song._id, playlistData.songs[0], playlistData.songs.find(sId => sId === song._id))
+                return playlistData.songs.find(sId => sId === song._id)
+            })
+
+            setPlaylistSongs(ps);
+            // console.log('ps', playlistSongs);
+
+        } catch (err) {
+        }
+    }, [playlistData])
+
+    // if (!playlistSongs.length) setShowNoSongs(true);
+
+    useEffect(() => {
+        setShowNoSongs(true);
+    }, [playlistSongs])
+    // console.log('plyalistData', typeof(playlistData));
+
+    return playlistData && playlistSongs ? (
         <>
-            {/* <Navbar /> */}
-            <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end">
-                <img className="w-48 rounded" src={playlistData.image} alt="Playlist Image" />
-                <div className="flex flex-col">
-                    <p>Playlist</p>
-                    <h2 className="text-5xl font-bold mb-4 md:text-7xl">{playlistData.name}</h2>
-                    <h3>{playlistData.desc}</h3>
-                    <p className="mt-1">
-                        <img className="inline-block w-5" src={assets.logo} alt="dTunes" />
-                        <b>  {songsData.filter(song => song.playlist === playlistData.name).length} songs  </b>
-                        
-                    </p>
+            <PlaylistCover playlistData={playlistData} playlistSongs={playlistSongs} />
+            <PlaylistSongHeading />
 
-                </div>
-
-            </div>
-            <div className="grid grid-cols-3 mt-10 mb-4 pl-2 text-[#a7a7a7]">
-                <p><b className="mr-4">#</b>Title</p>
-                <p>Likes & Dislikes:</p>
-                <img className="m-auto w-4" src={assets.clock_icon} alt="Time" />
-
-            </div>
-            <hr />
-            {songsData.filter(song => song.playlist === playlistData.name).map((sd, idx) => {
+            {playlistSongs.map((sd, idx) => {
                 return (
-                    <div onClick={() => playWithId(sd._id)} key={uuid()} className={`grid grid-cols-3 gap-2 p-2 items-center text-[#a7a7a7] ${track && track._id === sd._id && 'bg-[#ffffff30]'} hover:bg-[#ffffff20] cursor-pointer`}>
-                        <p className="text-white">
-                            <b className="mr-4 text-[#a7a7a7]">{idx + 1}</b>
-                            <img className="inline w-10 mr-5" src={sd.image} alt={sd.name} />
-                            {sd.name}
-                        </p>
-
-                        <LikesDislikes songId={sd._id} likes={sd.likes} dislikes={sd.dislikes}/>
-
-                        <p className="text-[15px] text-center">
-                            {sd.duration}
-                        </p>
-
-                    </div>
+                    <PlaylistSong key={uuid()} clickFunc={() => playWithId(sd._id)} track={track} sd={sd} idx={idx} />
                 )
             })}
         </>

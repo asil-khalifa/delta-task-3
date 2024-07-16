@@ -6,14 +6,18 @@ import { PlayerContext } from "../context/PlayerContext";
 
 
 export default function Normal() {
-    const { audioRef, track, songsData } = useContext(PlayerContext);
+    const { audioRef, track, songsData, showNoSongs } = useContext(PlayerContext);
 
     //sets collapsed to true; has effect only in less than large devices
     const [collapsedSidebar, setCollapsedSidebar] = useState(true);
 
     return (
             <div className='h-screen bg-black'>
-                {songsData.length !== 0
+
+                {/* Don't attempt to display if songsData is not yet loaded
+                showNoSongs is true if searching for something that doesn't exist or likedSongs is empty array */}
+
+                {songsData.length !== 0 || showNoSongs
                     ? <>
                         {/* <Sidebar/> */}
                         <div className='h-[90%] flex'>
