@@ -25,7 +25,6 @@ export default function DisplayPlaylist({ }) {
     useEffect(() => {
         try {
 
-            console.log('sd', songsData);
             let ps = songsData.filter(song => {
                 // console.log(song._id === playlistData.songs[0], song._id, playlistData.songs[0], playlistData.songs.find(sId => sId === song._id))
                 return playlistData.songs.find(sId => sId === song._id)
@@ -44,10 +43,19 @@ export default function DisplayPlaylist({ }) {
         setShowNoSongs(true);
     }, [playlistSongs])
     // console.log('plyalistData', typeof(playlistData));
+    
+    const dtunesStorage = localStorage.getItem('dtunesStorage');
+    let loggedIn = false, user = {};
+
+    if (dtunesStorage){
+        ({loggedIn, user} = JSON.parse(dtunesStorage));
+    }
+    
+    const canEdit = (loggedIn && user.playlists.find(pId => pId === playlistData._id))?true:false;
 
     return playlistData && playlistSongs ? (
         <>
-            <PlaylistCover playlistData={playlistData} playlistSongs={playlistSongs} />
+            <PlaylistCover playlistData={playlistData} playlistSongs={playlistSongs} canEdit={canEdit}/>
             <PlaylistSongHeading />
 
             {playlistSongs.map((sd, idx) => {

@@ -18,8 +18,10 @@ if (dtunesStorage){
 const playlistData = {
     name: 'Liked Songs',
     desc: 'You can find the songs you liked here.',
-    bgColor: '#ff0000',
+    //this bgColor is not taken, it's hard-coded in Display.jsx
+    bgColor: '#ef476fbb',
     image: assets.like_icon,
+    isPublic: false,
 }
 
 const backendUrl = 'http://localhost:2006';

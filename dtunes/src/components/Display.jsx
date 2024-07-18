@@ -36,6 +36,9 @@ export default function Display({setCollapsedSidebar}) {
         if (bgColor) {
             displayRef.current.style.background = `linear-gradient(${bgColor}, #121212)`
         }
+        else if (location && location.pathname === '/liked-songs'){
+            displayRef.current.style.background = `linear-gradient(#ef476fbb, #121212)`
+        }
         else {
             displayRef.current.style.background = '#121212'
         }

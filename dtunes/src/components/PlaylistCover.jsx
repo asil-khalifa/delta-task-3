@@ -1,7 +1,10 @@
 import { useLocation } from "react-router-dom";
 import { assets } from "../assets/user/assets";
+import { totalPlaylistTime } from "../utils";
 
 export default function PlaylistCover({ playlistData, playlistSongs, canEdit=true }) {
+    
+
     const location = useLocation();
     const editLink = location.pathname.replace('playlist', 'playlists')+'/add-song'
     return (
@@ -18,7 +21,9 @@ export default function PlaylistCover({ playlistData, playlistSongs, canEdit=tru
                 <h3>{playlistData.desc}</h3>
                 <p className="mt-1">
                     <img className="inline-block w-5" src={assets.logo} alt="dTunes" />
-                    <b>  {playlistSongs.length} songs  </b>
+                    <b className="mr-2 ml-2">{playlistSongs.length} songs</b>
+                    <b className="mr-2 text-rose-500">{playlistData.isPublic?'Public':'Private'}</b>
+                    <b className="mr-2 text-blue-700">{totalPlaylistTime(playlistSongs)}</b>
                 </p>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useRef, useState } from "react";
 // import { songsData } from "../assets/user/assets";
-import axios from 'axios';
+import axios, { all } from 'axios';
 import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
 
@@ -44,10 +44,13 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     //api:
     const [songsData, setSongsData] = useState([]);
     const [playlistsData, setPlaylistsData] = useState([]);
+    const [usersData, setUsersData] = useState([]);
+    
     const [searchQuery, setSearchQuery] = useState({
         term: '',
-        filter: '',
+        filter: 'songs',
     });
+
     const curLocation = useLocation();
     const [withinPlaylist, setWithinPlaylist] = useState(false);
 
@@ -63,9 +66,9 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                 // shuffleArray(songsAvailable);
 
                 //search:
-                if (searchQuery.term) {
+                if (searchQuery.term && searchQuery.filter === 'songs') {
                     //lowercase both
-                    songsAvailable = songsAvailable.filter(song => song.name.toLowerCase().indexOf(searchQuery.term.toLowerCase()) !== -1)
+                    songsAvailable = songsAvailable.filter(song => song.name.toLowerCase().indexOf(searchQuery.term) !== -1)
 
                     if (!songsAvailable.length) setShowNoSongs(true);
                     else setShowNoSongs(false);
@@ -81,13 +84,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         if (extraSlashIndex !== -1) {
                             playlistId = playlistId.slice(0, extraSlashIndex)
                         }
-                        // let playlistName = playlistsData.find(p => p._id === playlistId)
-
-                        // if (playlistName) {
-                        //     playlistName = playlistName.name;
-                        //     songsAvailable = songsAvailable.filter(s => s.playlist === playlistName);
-                        //     setWithinPlaylist(true);
-                        // }
 
                         let playlistData = playlistsData.find(p => p._id === playlistId);
                         if(playlistData){
@@ -143,24 +139,65 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         }
     }
 
+    async function getUsers(){
+        try{
+
+            const response = await axios.get(`${backendUrl}/api/users`);
+            if(response.data.success){
+                const allUsers = response.data.users;
+                //if searching for users, filter by both username and name
+                if (searchQuery.filter === 'users'){
+                    const filteredUsers = allUsers.filter(user => {
+                        //search query is already lowercased
+
+                        const name = user.name.toLowerCase();
+                        const username = user.username.toLowerCase();
+
+                        return name.indexOf(searchQuery.term)!== -1 ||
+                        username.indexOf(searchQuery.term)!== -1
+                    })
+                    setUsersData(filteredUsers)
+                }
+                else{
+                    setUsersData(allUsers);
+                }
+            }
+            else{
+                toast.warn('Some error occured while retrieving users')
+                console.log(response);
+            }
+        }catch(err){
+            toast.error('Some error occured while retrieving users')
+            console.log(response);
+        }
+    }
+
     useEffect(() => {
         getSongs();
+        getUsers();
     }, [searchQuery])
 
     useEffect(() => {
         getSongs();
         getPlaylists();
+        getUsers();
     }, [])
 
-    function handleSearch(term = '', filter = '') {
+    function handleSearch(term=undefined, filter=undefined) {
 
-        setSearchQuery(sq => {
-            return { ...sq, term }
-        })
+        if(term !== undefined){
 
-        setSearchQuery(sq => {
-            return { ...sq, filter };
-        })
+            setSearchQuery(sq => {
+                return { ...sq, term: term.toLowerCase() }
+            })
+        }
+
+        if (filter !== undefined){
+
+            setSearchQuery(sq => {
+                return { ...sq, filter };
+            })
+        }
 
     }
 
@@ -206,7 +243,8 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         songsData, setSongsData,
         playlistsData,
         searchQuery, handleSearch,
-        showNoSongs, setShowNoSongs
+        showNoSongs, setShowNoSongs,
+        usersData, setUsersData,
 
     }
 
@@ -216,7 +254,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     async function previous() {
-        console.log('hi');
         songsData.map((song, idx) => {
             if (song._id === track._id && idx > 0) {
                 setTrack(songsData[idx - 1]);
@@ -226,7 +263,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     async function next() {
-        console.log('next', songsData);
         songsData.map((song, idx) => {
             if (song._id === track._id && idx < songsData.length - 1) {
                 setTrack(songsData[idx + 1]);

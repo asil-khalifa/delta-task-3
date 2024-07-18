@@ -3,12 +3,11 @@ import songModel from '../models/song.js'
 import userModel from '../models/user.js';
 
 async function addSong(req, res) {
-    const { name, desc, playlist } = req.body;
+    const { name, desc } = req.body;
     const { image, audio } = req.files;
 
     const imageFile = image[0];
     const audioFile = audio[0];
-    // console.log(name, desc, playlist, imageFile.path, audioFile.path);
 
     try {
         const audioUpload = await cloudinary.uploader.upload(audioFile.path, { resource_type: 'video' })
@@ -24,7 +23,6 @@ async function addSong(req, res) {
         const songData = {
             name,
             desc,
-            playlist,
             image: imageUpload.secure_url,
             file: audioUpload.secure_url,
             duration,
@@ -137,6 +135,7 @@ async function addDislike(req, res){
 //     await songModel.updateMany({}, {$set: {likes: [], dislikes: []}});
 //     res.send('done');
 // }
+
 
 export { addSong, listSong, removeSong, addLike, addDislike};
 

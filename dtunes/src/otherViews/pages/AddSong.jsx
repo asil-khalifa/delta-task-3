@@ -10,8 +10,7 @@ export default function AddSong({ backendUrl }) {
     const [song, setSong] = useState(false);
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
-    const [playlist, setPlaylist] = useState('None');
-    const [playlistList, setPlaylistList] = useState([]);
+
 
     async function submitHandler(e) {
         if (e) e.preventDefault();
@@ -21,7 +20,6 @@ export default function AddSong({ backendUrl }) {
             formData.append('desc', desc);
             formData.append('image', image);
             formData.append('audio', song);
-            formData.append('playlist', playlist);
 
             // const response = await axios.post(`${backendUrl}/api/songs`, formData);
 
@@ -38,7 +36,6 @@ export default function AddSong({ backendUrl }) {
 
                 setName('');
                 setDesc('');
-                setPlaylist('');
                 setSong(false);
                 setImage(false);
 
@@ -52,28 +49,6 @@ export default function AddSong({ backendUrl }) {
             toast.error('Some Error occured. Please Retry!')
         }
     }
-
-    async function getPlaylists() {
-        try {
-            const response = await axios.get(`${backendUrl}/api/playlists`)
-            if (response.data.success) {
-                setPlaylistList(response.data.playlists);
-            }
-            else {
-                toast.warn('Coudn\'t receive playlists list. Reload page!')
-                console.log(response);
-            }
-        }
-        catch (err) {
-            toast.error('Error getting playlists list. Please Reload')
-            console.log(response);
-
-        }
-    }
-
-    useEffect(() => {
-        getPlaylists();
-    }, []);
 
     return (
         <>
@@ -105,16 +80,6 @@ export default function AddSong({ backendUrl }) {
             <div className="flex flex-col gap-2.5">
                 <p>Song Description:</p>
                 <input onChange={(e) => setDesc(e.target.value)} value={desc} className="bg-transparent focus:bg-blue-100 outline-green-600 border-2 border-gray-400 hover:border-green-500 p-2.5 w-[max(40vw,250px)]" placeholder="Song Description" type="text" />
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-                <p>Playlist:</p>
-                <select onChange={(e) => setPlaylist(e.target.value)} value={playlist} className="bg-transparent outline-green-600 border-2 border-gray-400 hover:border-green-500 p-2" name="playlist" id="playlist">
-                    <option value={'None'}>None</option>
-                    <option value="testplaylist">Test Playlist</option>
-                    {playlistList.map(playlist => <option key={uuid()} value={playlist.name}>{playlist.name}</option>)}
-                </select>
-
             </div>
 
             <button className="text-base bg-green-600 hover:bg-green-700 active:bg-green-800 text-white cursor-pointer px-6 py-3 rounded-full" type="submit">Add</button>

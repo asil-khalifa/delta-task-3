@@ -3,9 +3,10 @@ import { assets } from "../assets/user/assets";
 import { useContext, useState } from "react";
 import { PlayerContext } from "../context/PlayerContext";
 import SearchFilter from "./SearchFilter";
+import ProfileIcon from "./ProfileIcon";
 
 export default function Navbar({setCollapsedSidebar}){
-    const {handleSearch} = useContext(PlayerContext);
+    const {handleSearch, searchQuery} = useContext(PlayerContext);
 
     const navigate = useNavigate();
     const [forceUpdate, setForceUpdate] = useState([]);
@@ -29,7 +30,6 @@ export default function Navbar({setCollapsedSidebar}){
             <div className="flex items-center gap-2">
                 <img onClick={() => navigate(-1)} className="w-8 bg-black hover:bg-gray-800 active:bg-gray-700 p-2 rounded-2xl cursor-pointer" src={assets.arrow_left} alt="" />
                 <img onClick={() => navigate(1)} className="w-8 bg-black hover:bg-gray-800 active:bg-gray-700 p-2 rounded-2xl cursor-pointer" src={assets.arrow_right} alt="" />
-
             </div>
             
             {/* {SEARCH BAR:} */}
@@ -47,17 +47,19 @@ export default function Navbar({setCollapsedSidebar}){
                 {!loggedIn && <a href="/users/new?isArtist=false&newUser=true"><p className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer block md:hidden">Login</p></a>}
                 
                 {loggedIn && <p onClick={() => logout()} className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer block">Logout</p>}
-                {/* bg-[#ffffff] */}
-                {loggedIn && <p onClick={() => setCollapsedSidebar(s => !s)} style={{backgroundColor:  user.profileColor}} className={`border border-green-700 text-black w-8 h-8 rounded-full flex items-center justify-center`}>{user?user.name[0].toUpperCase():'A'}</p>}
+                {/* PROFILE ICON */}
+                {/* {loggedIn && <p onClick={() => setCollapsedSidebar(s => !s)} style={{backgroundColor:  user.profileColor}} className={`border border-green-700 text-black w-8 h-8 rounded-full flex items-center justify-center cursor-pointer lg:cursor-auto `}>{user?user.name[0].toUpperCase():'A'}</p>} */}
+                {loggedIn && <ProfileIcon clickFunc={() => setCollapsedSidebar(s => !s)} profileColor={user.profileColor} letter={user?user.name[0].toUpperCase():'A'}/>}
                 {!loggedIn && <img onClick={() => setCollapsedSidebar(s => !s)} className="w-8 h-8 lg:hidden" src={assets.threeLines}></img>}
 
             </div>
 
         </div>
+        {/* Search Bar Options: */}
         <div className="flex items-center gap-2 mt-4">
-            <SearchFilter selected={true} text='All'/>
-            <SearchFilter selected={false} text='Playlists'/>
-            <SearchFilter selected={false} text='Songs'/>
+            <p className="mr-1">Searching for:</p>
+            <SearchFilter clickFunc={() => handleSearch(undefined, 'songs')} selected={searchQuery.filter === 'songs'} text='Music'/>
+            <SearchFilter clickFunc={() => handleSearch(undefined, 'users')} selected={searchQuery.filter === 'users'} text='Users'/>
         </div>
         </>
     )
