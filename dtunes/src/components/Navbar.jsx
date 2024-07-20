@@ -48,7 +48,7 @@ export default function Navbar({setCollapsedSidebar}){
                 {loggedIn && <p onClick={() => logout()} className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white py-1 px-3 rounded-2xl text-[15px] cursor-pointer block">Logout</p>}
                 {/* PROFILE ICON */}
                 {/* {loggedIn && <p onClick={() => setCollapsedSidebar(s => !s)} style={{backgroundColor:  user.profileColor}} className={`border border-green-700 text-black w-8 h-8 rounded-full flex items-center justify-center cursor-pointer lg:cursor-auto `}>{user?user.name[0].toUpperCase():'A'}</p>} */}
-                {loggedIn && <ProfileIcon clickFunc={() => setCollapsedSidebar(s => !s)} profileColor={user.profileColor} letter={user?user.name[0].toUpperCase():'A'}/>}
+                {loggedIn && <ProfileIcon clickFunc={() => setCollapsedSidebar(s => !s)} profileColor={user.profileColor} letter={user?user.name[0].toUpperCase():'A'} isArtist={user.isArtist}/>}
                 {!loggedIn && <img onClick={() => setCollapsedSidebar(s => !s)} className="w-8 h-8 lg:hidden" src={assets.threeLines}></img>}
 
             </div>

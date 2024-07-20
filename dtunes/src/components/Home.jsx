@@ -10,7 +10,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export default function Home({setBgColor}) {
+export default function Home({ setBgColor }) {
     const { songsData, playlistsData, track, searchQuery, usersData } = useContext(PlayerContext);
 
     //jwt:
@@ -18,13 +18,13 @@ export default function Home({setBgColor}) {
     const { loggedIn, user } = auth;
     const axiosPrivate = useAxiosPrivate();
 
-    async function testPrivate(){
-        try{
+    async function testPrivate() {
+        try {
             const response = await axiosPrivate.get('/api/users/testing/privatetest');
             console.log(response.data);
-        }catch(err){
+        } catch (err) {
             console.log('RefreshToken expired, navigating to login screen')
-            navigate('/users/new', {state: {from: location}, replace: true})
+            navigate('/users/new', { state: { from: location }, replace: true })
         }
     }
 
@@ -34,17 +34,20 @@ export default function Home({setBgColor}) {
     useEffect(() => {
         setBgColor('#121212');
     }, []);
-    
+
     return (
         <>
-            {/* DISPLAY OF USERS:  (Only if searching and is not empty)*/}
-            
-            {searchQuery.filter === 'users' && usersData && <DisplaySongsUsers heading='Users:'>
-                {usersData.map(user => {
-                    
-                    return <UserItem key={uuid()} username={user.username} name={user.name} profileColor={user.profileColor}/>
-                })}
-            </DisplaySongsUsers>}
+            {/* DISPLAY OF USERS:  (Only if searching and usersData is not empty)*/}
+
+            {searchQuery.filter === 'users' && usersData &&
+                <DisplaySongsUsers heading='Users:'>
+                    {usersData.map(otherUser => {
+                        //if logged in, don't display the same user in list
+                        if (!loggedIn || otherUser._id !== user._id) {
+                            return <UserItem key={uuid()} id={otherUser._id} username={otherUser.username} name={otherUser.name} profileColor={otherUser.profileColor} isArtist={otherUser.isArtist} />
+                        }
+                    })}
+                </DisplaySongsUsers>}
 
             {/* DISPLAY OF PLAYLISTS: */}
             <div className="mb-4">

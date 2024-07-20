@@ -17,10 +17,20 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Playlist'
     }],
-    friends: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }],
+    friends: {
+        incoming: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+        accepted: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+        outgoing: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+    },
     isArtist: {
         type: Boolean,
         required: true,
