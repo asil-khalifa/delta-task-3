@@ -3,7 +3,7 @@ import { assets } from '../assets/user/assets'
 import { PlayerContext } from '../context/PlayerContext'
 
 export default function Player() {
-    const { seekBgRef, seekBarRef, playing, play, pause, track, time, seekAudio, previous, next } = useContext(PlayerContext);
+    const { seekBgRef, seekBarRef, playing, play, pause, track, time, seekAudio, previous, next, nextRef } = useContext(PlayerContext);
     const zeroFormat = { current: time.current.second < 10, total: time.total.second < 10 }
     return track ? (
         <div className="h-[10%] bg-black flex justify-between items-center text-white px-4">
@@ -27,7 +27,7 @@ export default function Player() {
                         ? <img onClick={pause} className='w-4 cursor-pointer' src={assets.pause_icon} alt="pause" />
                         : <img onClick={play} className='w-4 cursor-pointer' src={assets.play_icon} alt="play" />
                     }
-                    <img onClick={next} className='w-4 cursor-pointer' src={assets.next_icon} alt="next" />
+                    <img ref={nextRef} onClick={next} className='w-4 cursor-pointer' src={assets.next_icon} alt="next" />
                     <img className='w-4 cursor-pointer' src={assets.loop_icon} alt="loop" />
                 </div>
                 <div className='flex items-center gap-4'>

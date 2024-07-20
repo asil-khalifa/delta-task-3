@@ -1,4 +1,3 @@
-import { useSearchParams } from "react-router-dom";
 import LoginNavbarOption from "./LoginNavbarOption";
 
 export default function LoginNavbar({activated}){

@@ -1,5 +1,4 @@
-import { useParams } from "react-router-dom";
-import { assets } from "../assets/user/assets";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuid } from 'uuid'
 import { useContext } from "react";
 import { PlayerContext } from "../context/PlayerContext";
@@ -8,10 +7,15 @@ import { useEffect } from "react";
 import PlaylistSong from "./PlaylistSong";
 import PlaylistSongHeading from './PlaylistSongHeading'
 import PlaylistCover from "./PlaylistCover";
+import useAuth from "../hooks/useAuth";
 
-export default function DisplayPlaylist({ }) {
+export default function DisplayPlaylist({ setBgColor}) {
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
+    
     const { id } = useParams();
     const { playWithId, playlistsData, songsData, track, setShowNoSongs } = useContext(PlayerContext);
+    const navigate = useNavigate();
 
     const [playlistData, setPlaylistData] = useState('');
 
@@ -22,9 +26,15 @@ export default function DisplayPlaylist({ }) {
         setPlaylistData(playlistsData.find(playlist => playlist._id === id))
     }, [])
 
+    useEffect(() =>  {
+        if (playlistData){
+            setBgColor(`linear-gradient(${playlistData.bgColor}, #121212)`);
+            // setBgColor(`#3a4bc1`);
+        }
+    }, [playlistData])
+
     useEffect(() => {
         try {
-
             let ps = songsData.filter(song => {
                 // console.log(song._id === playlistData.songs[0], song._id, playlistData.songs[0], playlistData.songs.find(sId => sId === song._id))
                 return playlistData.songs.find(sId => sId === song._id)
@@ -42,14 +52,6 @@ export default function DisplayPlaylist({ }) {
     useEffect(() => {
         setShowNoSongs(true);
     }, [playlistSongs])
-    // console.log('plyalistData', typeof(playlistData));
-    
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
-
-    if (dtunesStorage){
-        ({loggedIn, user} = JSON.parse(dtunesStorage));
-    }
     
     const canEdit = (loggedIn && user.playlists.find(pId => pId === playlistData._id))?true:false;
 

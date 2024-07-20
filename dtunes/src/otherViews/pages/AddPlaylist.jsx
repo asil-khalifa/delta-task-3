@@ -1,29 +1,25 @@
 import { useState } from "react";
 import { assets } from "../assets/artist/assets";
 import { toast } from "react-toastify";
-import axios from "axios";
 import Navbar from "../components/Navbar";
+import useAuth from "../../hooks/useAuth";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
 function randomColor() {
     const colors = ['#744210', '#234e52', '#44337a', '#742a2a', '#22543d', '#2a4365'];
     return colors[Math.floor(Math.random() * colors.length)]
 }
 
-
-
-export default function AddPlaylist({ backendUrl }) {
+export default function AddPlaylist({ }) {
     const [image, setImage] = useState(false);
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
     const [bgColor, setBgColor] = useState(randomColor);
 
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
-
-    if (dtunesStorage) {
-        ({ loggedIn, user } = JSON.parse(dtunesStorage));
-    }
-
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
+    const axiosPrivate = useAxiosPrivate();
+    
     async function submitHandler(e) {
         e.preventDefault();
         if(!loggedIn) return;
@@ -40,7 +36,7 @@ export default function AddPlaylist({ backendUrl }) {
             formData.append('userId', user._id);
 
             const response = await toast.promise(
-                axios.post(`${backendUrl}/api/playlists`, formData),
+                axiosPrivate.post(`/api/playlists`, formData),
                 {
                     pending: 'Uploading... Please wait',
                 }
@@ -56,6 +52,13 @@ export default function AddPlaylist({ backendUrl }) {
                 setDesc('');
                 setBgColor(randomColor());
             }
+            //response status codes from auth.js
+            else if (response.status === 401){
+                toast.error('You are not logged in, log in to upload')
+            }
+            else if (response.status === 403){
+                toast.error('You are not authorized to upload')
+            }
             else {
                 toast.warn('Playlist was not added. Please Retry!')
             }
@@ -69,7 +72,7 @@ export default function AddPlaylist({ backendUrl }) {
     return (
         <>
         <Navbar pageHeading="Create new Playlist"/>
-        <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600">
+        {loggedIn && <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600">
             <div className="flex flex-col gap-4">
                 <p>Upload Image</p>
                 <input onChange={e => setImage(e.target.files[0])} type="file" id="image" name="image" accept='image/*' hidden />
@@ -95,7 +98,7 @@ export default function AddPlaylist({ backendUrl }) {
             </div>
 
             <button className="text-base bg-green-600 hover:bg-green-700 active:bg-green-800 text-white cursor-pointer px-6 py-3 rounded-full" type="submit">Add</button>
-        </form>
+        </form>}
         </>
     )
 }

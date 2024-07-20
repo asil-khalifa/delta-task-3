@@ -1,16 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { assets } from '../assets/user/assets'
 import SidebarItem from './SidebarItem';
+import useAuth from '../hooks/useAuth';
 
 export default function Sidebar({ collapsed = true }) {
     const navigate = useNavigate();
 
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
-
-    if (dtunesStorage) {
-        ({ loggedIn, user } = JSON.parse(dtunesStorage));
-    }
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
 
     function clickCreatePlaylist() {
 

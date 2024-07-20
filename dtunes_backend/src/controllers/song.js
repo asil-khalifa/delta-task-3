@@ -61,13 +61,17 @@ async function removeSong(req, res) {
 //If user already liked, removes it, else adds like:
 async function addLike(req, res){
     try{
-        const {userId, songId} = req.body;
+        const {_id: userId} = req.authenticatedUser;
+        const {songId} = req.body;
+
         const song = await songModel.findById(songId);
         const user = await userModel.findById(userId);
 
         const alreadyLiked = song.likes.filter((likeId) => likeId.equals(userId))
         const wasLiked = alreadyLiked.length>0;
 
+        const alreadyDisliked = song.dislikes.filter((likeId) => likeId.equals(userId))
+        const wasDisliked = alreadyDisliked.length>0;
         //update id's both in user and the song:
         if(wasLiked){
             song.likes = song.likes.filter(likeId => !likeId.equals(userId));
@@ -82,7 +86,15 @@ async function addLike(req, res){
 
             user.likedSongs.push(songId);
             await user.save();
-            
+
+            //prevent both like and dislike:
+            if (wasDisliked){
+                song.dislikes = song.dislikes.filter(likeId => !likeId.equals(userId));
+                await song.save();
+    
+                user.dislikedSongs = user.dislikedSongs.filter(sId => !sId.equals(songId));
+                await user.save();
+            }
         }
 
         res.json({success: true, wasLiked});
@@ -96,12 +108,17 @@ async function addLike(req, res){
 
 async function addDislike(req, res){
     try{
-        const {userId, songId} = req.body;
+        const {_id: userId} = req.authenticatedUser;
+        const {songId} = req.body;
+
         const song = await songModel.findById(songId);
         const user = await userModel.findById(userId);
 
         const alreadyDisliked = song.dislikes.filter((likeId) => likeId.equals(userId))
         const wasDisliked = alreadyDisliked.length>0;
+
+        const alreadyLiked = song.likes.filter((likeId) => likeId.equals(userId))
+        const wasLiked = alreadyLiked.length>0;
 
         if(wasDisliked){
             song.dislikes = song.dislikes.filter(likeId => !likeId.equals(userId));
@@ -116,6 +133,15 @@ async function addDislike(req, res){
             
             user.dislikedSongs.push(songId);
             await user.save();
+
+            //prevent both like and dislike
+            if (wasLiked){
+                song.likes = song.likes.filter(likeId => !likeId.equals(userId));
+                await song.save();
+    
+                user.likedSongs = user.likedSongs.filter(sId => !sId.equals(songId));
+                await user.save();
+            }
         }
 
         res.json({success: true, wasDisliked});

@@ -1,15 +1,20 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import InputBox from "../components/InputBox";
 import SubmitButton from '../components/SubmitButton'
 import { toast } from "react-toastify";
-import axios from "axios";
-import LoginNavbar from "../components/LoginNavbar";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import axiosBase from "../../api/axiosBase.jsx";
+import useAuth from "../../hooks/useAuth.jsx";
 
 
-export default function LoginRegisterForm({ backendUrl, activated }) {
+export default function LoginRegisterForm({ activated }) {
+    const {setAuth} = useAuth();
+
+    const location = useLocation();
     const navigate = useNavigate();
+    //for going back to page we came from for getting new refresh token by logging in
+    const from = location.state?.from?.pathname || '/';
 
     let isArtist = activated[4];
     let newUser = activated[5];
@@ -88,16 +93,22 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
 
         }
 
+        //-------------------------REGISTER--------------------------------
+
         if (newUser) {
             try {
 
-                const response = await axios.post(`${backendUrl}/api/users`, formData);
+                const response = await axiosBase.post(`/api/users`, formData, {withCredentials: true, credentials: 'include'});
                 if (response.data.success) {
                     toast.success('Your account is now created!');
                     resetForm();
                     console.log(response);
-                    localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user }))
-                    navigate('/');
+                    // localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user }))
+                    // navigate('/');
+                    const accessToken = response.data?.accessToken;
+                    setAuth({loggedIn: true, user: response.data?.user, accessToken});
+                    
+                    navigate(from, {replace: true});
                 }
                 else {
                     if (response.data.errorCode === 'usernameDuplicate') {
@@ -112,16 +123,24 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
             }
         }
 
+        //-------------------------LOGIN--------------------------------
         else {
             try {
 
-                const response = await axios.post(`${backendUrl}/api/users/login`, formData);
+                const response = await axiosBase.post(`/api/users/login`, formData, {withCredentials: true, credentials: 'include'});
                 if (response.data.success) {
                     toast.success('Successfully logged in!');
                     resetForm();
 
-                    localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user }))
-                    navigate('/');
+                    // localStorage.setItem('dtunesStorage', JSON.stringify({ loggedIn: true, user: response.data.user, token: response.data.accessToken }))
+
+                    //jwt
+                    const accessToken = response.data?.accessToken;
+                    setAuth({loggedIn: true, user: response.data?.user, accessToken});
+
+                    // navigate('/');
+                    //replace true changes the current item (login page) in history stack with the given item (home)
+                    navigate(from, {replace: true})
                 }
                 else {
                     if (response.data.errorCode === 'usernameNotExist') {
@@ -137,7 +156,7 @@ export default function LoginRegisterForm({ backendUrl, activated }) {
                 }
             } catch (err) {
                 toast.error('Some error occured, try again later');
-                console.log(response, err);
+                console.log(err);
             }
         }
     }

@@ -1,15 +1,11 @@
-import { NavLink } from "react-router-dom"
+import useAuth from "../../hooks/useAuth";
 import { assets } from "../assets/artist/assets"
 import SidebarButtons from "./SidebarButtons"
 
 export default function Sidebar() {
 
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
-
-    if (dtunesStorage){
-        ({loggedIn, user} = JSON.parse(dtunesStorage));
-    }
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
 
     return (
         <div className="bg-[#00013a] min-h-screen pl-[4vw]">

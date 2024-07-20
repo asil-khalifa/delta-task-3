@@ -70,11 +70,11 @@ async function addSongToPlaylist(req, res) {
     try {
 
         const { playlistId, songId } = req.params;
-        const { userId } = req.body;
+        const { _id: userId } = req.authenticatedUser;
 
         const user = await userModel.findById(userId);
-        if (!user) return res.json({success: false, errorCode: 'userNotExists'});        
-            
+        if (!user) return res.json({ success: false, errorCode: 'userNotExists' });
+
         if (!user.playlists.find(pId => pId.equals(playlistId))) return res.json({ success: false, errorCode: 'userNotAllowed' })
 
         const playlist = await playlistModel.findById(playlistId);
@@ -88,21 +88,27 @@ async function addSongToPlaylist(req, res) {
         playlist.songs.push(songId);
         playlist.save();
 
-        res.json({success: true})
+        res.json({ success: true })
 
     } catch (err) {
         console.log(err);
-        res.json({success: false, errorCode: 'unknownError', error: err})
+        res.json({ success: false, errorCode: 'unknownError', error: err })
     }
 
 }
 
-async function getSongsOfPlaylist(req, res){
-    try{
-        const {pId} = req.params;
+async function getSongsOfPlaylist(req, res) {
+    try {
+        const { playlists: userPlaylists } = req.authenticatedUser;
+
+        const { pId } = req.params;
         const playlist = await playlistModel.findById(pId).populate('songs');
 
-        if (!playlist) return res.json({success: false, errorCode: 'playlistNotExists'});
+        if (!playlist) return res.json({ success: false, errorCode: 'playlistNotExists' });
+
+        if (!userPlaylists.find(playlistId => playlistId === pId)) {
+            return res.status(403).json({ success: false, message: 'from controllers>playlist>getSongsOfPlaylist' })
+        }
 
         let otherSongs = await songModel.find({});
 
@@ -110,24 +116,24 @@ async function getSongsOfPlaylist(req, res){
             return !playlist.songs.find(s => s._id.equals(song._id));
         })
 
-        res.json({success: true, songs: playlist.songs, excludedSongs: otherSongs});
+        res.json({ success: true, songs: playlist.songs, excludedSongs: otherSongs });
 
 
-    }catch(err){
+    } catch (err) {
         console.log(err);
-        res.json({success: false, error: err})
+        res.json({ success: false, error: err })
     }
 
 }
 
-async function removeSongFromPlaylist(req, res){
-    try{
+async function removeSongFromPlaylist(req, res) {
+    try {
 
-        const {playlistId, songId} = req.params;
-        const {userId} = req.query;
+        const { playlistId, songId } = req.params;
+        const {_id: userId} = req.authenticatedUser;
 
         const user = await userModel.findById(userId);
-        if (!user) return res.json({success: false, errorCode: 'userNotExists'});        
+        if (!user) return res.json({ success: false, errorCode: 'userNotExists' });
         if (!user.playlists.find(pId => pId.equals(playlistId))) return res.json({ success: false, errorCode: 'userNotAllowed' })
 
         const playlist = await playlistModel.findById(playlistId);
@@ -135,13 +141,13 @@ async function removeSongFromPlaylist(req, res){
         playlist.songs = playlist.songs.filter(sId => !sId.equals(songId));
         playlist.save();
 
-        res.json({success: true});
-    }catch(err){
+        res.json({ success: true });
+    } catch (err) {
         console.log(err);
-        res.json({success: false, error: err})
-        
+        res.json({ success: false, error: err })
+
     }
-    
+
 
 }
 // async function seedPlaylistSongs(req, res){

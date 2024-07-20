@@ -1,28 +1,40 @@
-import Navbar from "./Navbar";
-// import { playlistsData, songsData } from "../assets/user/assets";
 import PlaylistItem from "./PlaylistItem";
 import { v4 as uuid } from 'uuid'
 import SongItem from "./SongItem";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { PlayerContext } from "../context/PlayerContext";
 import { assets } from "../assets/user/assets";
 import DisplaySongsUsers from "./DisplaySongsUsers";
 import UserItem from "./UserItem";
-import axios from "axios";
-import { toast } from "react-toastify";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAuth from "../hooks/useAuth";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const backendUrl = 'http://localhost:2006'
-
-export default function Home() {
+export default function Home({setBgColor}) {
     const { songsData, playlistsData, track, searchQuery, usersData } = useContext(PlayerContext);
 
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
+    //jwt:
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
+    const axiosPrivate = useAxiosPrivate();
 
-    if (dtunesStorage) {
-        ({ loggedIn, user } = JSON.parse(dtunesStorage));
+    async function testPrivate(){
+        try{
+            const response = await axiosPrivate.get('/api/users/testing/privatetest');
+            console.log(response.data);
+        }catch(err){
+            console.log('RefreshToken expired, navigating to login screen')
+            navigate('/users/new', {state: {from: location}, replace: true})
+        }
     }
 
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        setBgColor('#121212');
+    }, []);
+    
     return (
         <>
             {/* DISPLAY OF USERS:  (Only if searching and is not empty)*/}
@@ -50,16 +62,14 @@ export default function Home() {
             </div>
 
             {/* DISPLAY OF SONGS: */}
-            {/* <div className="mb-4">
-                <h1 className="my-5 font-bold text-2xl">Songs:</h1>
-                <div className="flex flex-wrap justify-evenly overflow-auto">
-                    {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} currentlyPlaying={track._id && track._id === sd._id} />)}
-                </div>
-            </div> */}
 
             <DisplaySongsUsers heading='Songs:'>
                 {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} currentlyPlaying={track._id && track._id === sd._id} />)}
             </DisplaySongsUsers>
+
+            <button onClick={testPrivate}>
+                Refresh: Test Private
+            </button>
         </>
     )
 }

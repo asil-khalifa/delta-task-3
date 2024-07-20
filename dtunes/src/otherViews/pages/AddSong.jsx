@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { assets } from "../assets/artist/assets";
-import axios from 'axios';
 import { toast } from "react-toastify";
-import { v4 as uuid } from 'uuid';
 import Navbar from "../components/Navbar";
+import useAuth from "../../hooks/useAuth";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
-export default function AddSong({ backendUrl }) {
+export default function AddSong({ }) {
     const [image, setImage] = useState(false);
     const [song, setSong] = useState(false);
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
 
+    const { auth } = useAuth();
+    const { loggedIn, user } = auth;
+    const axiosPrivate = useAxiosPrivate();
 
     async function submitHandler(e) {
         if (e) e.preventDefault();
@@ -21,10 +24,8 @@ export default function AddSong({ backendUrl }) {
             formData.append('image', image);
             formData.append('audio', song);
 
-            // const response = await axios.post(`${backendUrl}/api/songs`, formData);
-
             const response = await toast.promise(
-                axios.post(`${backendUrl}/api/songs`, formData),
+                axiosPrivate.post(`/api/songs`, formData),
                 {
                     pending: 'Uploading... Please wait',
                 }
@@ -40,6 +41,12 @@ export default function AddSong({ backendUrl }) {
                 setImage(false);
 
             }
+            else if(response.status === 401){
+                toast.error('You are not logged in!');
+            }
+            else if (response.status === 403){
+                toast.error('You are not allowed to do this!');
+            }
             else {
                 toast.warn('Song not Added. Please Retry!')
             }
@@ -53,7 +60,7 @@ export default function AddSong({ backendUrl }) {
     return (
         <>
         <Navbar pageHeading="Publish New Song"/>
-        <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600" action="">
+        {loggedIn && user.isArtist && <form onSubmit={submitHandler} className="flex flex-col items-start gap-8 text-gray-600" action="">
             <div className="flex gap-8">
                 <div className="flex flex-col gap-4">
                     <p>Upload Song</p>
@@ -83,7 +90,7 @@ export default function AddSong({ backendUrl }) {
             </div>
 
             <button className="text-base bg-green-600 hover:bg-green-700 active:bg-green-800 text-white cursor-pointer px-6 py-3 rounded-full" type="submit">Add</button>
-        </form>
+        </form>}
         </>
     )
 }

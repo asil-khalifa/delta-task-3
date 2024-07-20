@@ -25,6 +25,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     const audioRef = useRef();
     const seekBgRef = useRef();
     const seekBarRef = useRef();
+    const nextRef = useRef();
 
     const [track, setTrack] = useState({});
     const [playing, setPlaying] = useState(false);
@@ -45,7 +46,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     const [songsData, setSongsData] = useState([]);
     const [playlistsData, setPlaylistsData] = useState([]);
     const [usersData, setUsersData] = useState([]);
-    
+
     const [searchQuery, setSearchQuery] = useState({
         term: '',
         filter: 'songs',
@@ -86,7 +87,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         }
 
                         let playlistData = playlistsData.find(p => p._id === playlistId);
-                        if(playlistData){
+                        if (playlistData) {
                             songsAvailable = songsAvailable.filter(song => playlistData.songs.find(sId => sId === song._id))
                         }
 
@@ -113,8 +114,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
             }
         } catch (err) {
             toast.error('Error occured while getting songs. Please Reload!')
-            console.log(response);
-            console.log(err);
+            console.log('error', err);
         }
     }
 
@@ -139,34 +139,34 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         }
     }
 
-    async function getUsers(){
-        try{
+    async function getUsers() {
+        try {
 
             const response = await axios.get(`${backendUrl}/api/users`);
-            if(response.data.success){
+            if (response.data.success) {
                 const allUsers = response.data.users;
                 //if searching for users, filter by both username and name
-                if (searchQuery.filter === 'users'){
+                if (searchQuery.filter === 'users') {
                     const filteredUsers = allUsers.filter(user => {
                         //search query is already lowercased
 
                         const name = user.name.toLowerCase();
                         const username = user.username.toLowerCase();
 
-                        return name.indexOf(searchQuery.term)!== -1 ||
-                        username.indexOf(searchQuery.term)!== -1
+                        return name.indexOf(searchQuery.term) !== -1 ||
+                            username.indexOf(searchQuery.term) !== -1
                     })
                     setUsersData(filteredUsers)
                 }
-                else{
+                else {
                     setUsersData(allUsers);
                 }
             }
-            else{
+            else {
                 toast.warn('Some error occured while retrieving users')
                 console.log(response);
             }
-        }catch(err){
+        } catch (err) {
             toast.error('Some error occured while retrieving users')
             console.log(response);
         }
@@ -183,16 +183,16 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         getUsers();
     }, [])
 
-    function handleSearch(term=undefined, filter=undefined) {
+    function handleSearch(term = undefined, filter = undefined) {
 
-        if(term !== undefined){
+        if (term !== undefined) {
 
             setSearchQuery(sq => {
                 return { ...sq, term: term.toLowerCase() }
             })
         }
 
-        if (filter !== undefined){
+        if (filter !== undefined) {
 
             setSearchQuery(sq => {
                 return { ...sq, filter };
@@ -245,7 +245,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         searchQuery, handleSearch,
         showNoSongs, setShowNoSongs,
         usersData, setUsersData,
-
+        nextRef,
     }
 
     async function playWithId(id) {
@@ -264,12 +264,18 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     async function next() {
         songsData.map((song, idx) => {
-            if (song._id === track._id && idx < songsData.length - 1) {
-                setTrack(songsData[idx + 1]);
+            if (song._id === track._id) {
+                if (idx < songsData.length - 1){
+                    setTrack(songsData[idx + 1]);
+                }
+                //if last song, go to first
+                else if (idx === songsData.length -1){
+                    setTrack(songsData[0]);
+                }
             }
         })
     }
-
+    
     //Play song upon change in track:
     useEffect(() => {
         try {
@@ -310,6 +316,11 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
         }
     }, [audioRef])
+
+    //automatically go to next song once one is over.
+    useEffect(() => {
+        audioRef.current.onended = next;
+    }, [track])
 
     return (
         <PlayerContext.Provider value={contextValue}>

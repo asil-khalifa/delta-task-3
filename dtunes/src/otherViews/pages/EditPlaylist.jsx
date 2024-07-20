@@ -1,17 +1,16 @@
-import axios from "axios";
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import ListOfSongs from "../components/ListOfSongs";
+import useAuth from "../../hooks/useAuth";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
-export default function EditPlaylist({ backendUrl }) {
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
+export default function EditPlaylist({ }) {
 
-    if (dtunesStorage) {
-        ({ loggedIn, user } = JSON.parse(dtunesStorage));
-    }
+    const { auth } = useAuth();
+    const { loggedIn } = auth;
+    const axiosPrivate = useAxiosPrivate();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -38,7 +37,7 @@ export default function EditPlaylist({ backendUrl }) {
 
     async function fetchSongs() {
         try {
-            const response = await axios.get(`${backendUrl}/api/playlists/${playlistId}/songs`)
+            const response = await axiosPrivate.get(`/api/playlists/${playlistId}/songs`)
             if (response.data.success) {
                 setIncludedSongs(response.data.songs);
                 setExcludedSongs(response.data.excludedSongs);
@@ -58,7 +57,7 @@ export default function EditPlaylist({ backendUrl }) {
 
     async function removeSong(id) {
         try {
-            const response = await axios.delete(`${backendUrl}/api/playlists/${playlistId}/${id}?userId=${user._id}`)
+            const response = await axiosPrivate.delete(`/api/playlists/${playlistId}/${id}`)
 
             if (response.data.success) {
                 toast.success('Removed Song Successfully!');
@@ -81,7 +80,7 @@ export default function EditPlaylist({ backendUrl }) {
 
     async function addSong(id) {
         try {
-            const response = await axios.post(`${backendUrl}/api/playlists/${playlistId}/${id}`, { userId: user._id })
+            const response = await axiosPrivate.post(`/api/playlists/${playlistId}/${id}`)
 
             if (response.data.success) {
                 toast.success('Added Song Successfully!');
@@ -110,8 +109,12 @@ export default function EditPlaylist({ backendUrl }) {
         <>
             <Navbar pageHeading="Add song to playlist" />
             <a href={`/playlist/${playlistId}`}><button className="text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white cursor-pointer px-4 py-3 rounded-full">Back to Playlist</button></a>
-            <ListOfSongs heading='Songs in Playlist' lastOption='Remove' color='red' data={includedSongs} clickFunc={removeSong} />
-            <ListOfSongs heading='Other Songs' lastOption='Add' color='green' data={excludedSongs} clickFunc={addSong} />
+            {loggedIn &&
+                <>
+                    <ListOfSongs heading='Songs in Playlist' lastOption='Remove' color='red' data={includedSongs} clickFunc={removeSong} />
+                    <ListOfSongs heading='Other Songs' lastOption='Add' color='green' data={excludedSongs} clickFunc={addSong} />
+                </>
+            }
         </>
     )
 }

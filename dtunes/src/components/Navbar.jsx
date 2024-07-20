@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { PlayerContext } from "../context/PlayerContext";
 import SearchFilter from "./SearchFilter";
 import ProfileIcon from "./ProfileIcon";
+import useAuth from "../hooks/useAuth";
 
 export default function Navbar({setCollapsedSidebar}){
     const {handleSearch, searchQuery} = useContext(PlayerContext);
@@ -11,15 +12,13 @@ export default function Navbar({setCollapsedSidebar}){
     const navigate = useNavigate();
     const [forceUpdate, setForceUpdate] = useState([]);
 
-    const dtunesStorage = localStorage.getItem('dtunesStorage');
-    let loggedIn = false, user = {};
-
-    if (dtunesStorage){
-        ({loggedIn, user} = JSON.parse(dtunesStorage));
-    }
-
+    // Maybe try using setState if loggedin doesn't work
+    const {auth, logout:authLogout} = useAuth();
+    const {loggedIn, user} = auth;
+        
     function logout(){
-        localStorage.setItem('dtunesStorage', JSON.stringify({}));
+        // localStorage.setItem('dtunesStorage', JSON.stringify({}));
+        authLogout();
         setForceUpdate(f => [...f]);
     }
 

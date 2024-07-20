@@ -11,7 +11,6 @@ import HomeButton from './components/HomeButton'
 import LoginNavbar from './components/LoginNavbar';
 import EditPlaylist from './pages/EditPlaylist';
 
-const backendUrl = 'http://localhost:2006';
 
 export default function OtherViewsMain({ requestedPath }) {
     
@@ -46,10 +45,10 @@ export default function OtherViewsMain({ requestedPath }) {
                 <div className='pl-5 sm:pl-12'>
 
                     {/* the below ':id' is passed as string, and can not be matched */}
-                    {requestedPath === '/playlists/:id/add-song' && <EditPlaylist backendUrl={backendUrl} />}
-                    {requestedPath === '/playlists/new' && <AddPlaylist backendUrl={backendUrl} />}
-                    {requestedPath === '/songs/new' && <AddSong backendUrl={backendUrl} />}
-                    {requestedPath === '/users/new' && <LoginRegisterForm backendUrl={backendUrl}  activated={loginPageOption()}/>}
+                    {requestedPath === '/playlists/:id/add-song' && <EditPlaylist/>}
+                    {requestedPath === '/playlists/new' && <AddPlaylist/>}
+                    {requestedPath === '/songs/new' && <AddSong/>}
+                    {requestedPath === '/users/new' && <LoginRegisterForm activated={loginPageOption()}/>}
 
                 </div>
 
