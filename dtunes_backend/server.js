@@ -14,7 +14,7 @@ import logoutRouter from './src/routes/logout.js';
 //App config:
 
 const app = express();
-const port = process.env.PORT || 2006;
+const port = 2006;
 
 connectDb();
 connectCloudinary();

@@ -4,8 +4,8 @@ import userModel from '../models/user.js';
 import { getSongLyrics } from '../utils.js';
 
 async function addSong(req, res) {
-    console.log(Object.keys(req));
-    console.log(req.body);
+    // console.log(Object.keys(req));
+    // console.log(req.body);
     
     const { name, desc } = req.body;
     const { image, audio } = req.files;

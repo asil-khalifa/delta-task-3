@@ -27,7 +27,7 @@ async function handleRefreshToken(req, res) {
             //!expires:
             //access token expire time (search for this comment for other places)
 
-            const accessToken = jwt.sign(foundUser, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' })
+            const accessToken = jwt.sign(foundUser, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '10m' })
             //foundUser also sent back for ease
             res.json({ success: true, accessToken, user: foundUser });
         })

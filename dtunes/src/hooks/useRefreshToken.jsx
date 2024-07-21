@@ -11,8 +11,6 @@ export default function useRefreshToken(){
         })
         
         setAuth(prev => {
-            console.log('old accessT', JSON.stringify(prev))
-            console.log('new accessT', response.data.accessToken);
             return {...prev, accessToken: response.data.accessToken, user: response.data.user}
         })
 

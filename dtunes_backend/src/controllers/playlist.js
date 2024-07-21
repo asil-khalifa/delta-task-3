@@ -5,8 +5,8 @@ import songModel from '../models/song.js';
 
 async function addPlaylist(req, res) {
     //!debug:
-    console.log(Object.keys(req));
-    console.log(req.file, req.body);
+    // console.log(Object.keys(req));
+    // console.log(req.file, req.body);
 
     let { name, desc, bgColor, isPublic, userId } = req.body;
 
@@ -31,8 +31,7 @@ async function addPlaylist(req, res) {
         }
 
         //Using diskStorage:
-        const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: 'image', timeout: 1000*120})
-
+        const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: 'image'})
         //Using MemoryStorage:
         // const imageUpload = await cloudinary.uploader.upload(dataURI, {resource_type: 'auto'} );
         

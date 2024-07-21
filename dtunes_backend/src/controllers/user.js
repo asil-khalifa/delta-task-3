@@ -42,7 +42,7 @@ async function addUser(req, res) {
         delete userJson?.refreshToken;
 
         //access token expire time (search for this comment for other places)
-        const accessToken = jwt.sign(userJson, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' })
+        const accessToken = jwt.sign(userJson, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '10m' })
         const refreshToken = jwt.sign(userJson, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '1d' })
 
         user.refreshToken = refreshToken;
@@ -87,7 +87,7 @@ async function authenticateUser(req, res) {
         delete foundUser?.refreshToken;
 
         //access token expire time (search for this comment for other places)
-        const accessToken = jwt.sign(foundUser, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' })
+        const accessToken = jwt.sign(foundUser, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '10m' })
         const refreshToken = jwt.sign(foundUser, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '1d' })
 
         //store refresh token in db

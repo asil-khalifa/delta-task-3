@@ -7,7 +7,6 @@ export default function SongLyrics({id}) {
     async function getLyrics(){
         try{
             const response = await axiosBase.get(`api/songs/${id}/lyrics`);
-            console.log(response);
             if (response.data.success){
                 setLyrics(response.data.lyrics);
             }
