@@ -4,8 +4,18 @@ import userModel from '../models/user.js';
 import songModel from '../models/song.js';
 
 async function addPlaylist(req, res) {
+    //!debug:
+    console.log(Object.keys(req));
+    console.log(req.file, req.body);
+
     let { name, desc, bgColor, isPublic, userId } = req.body;
+
+    //Using DiskStorage:
     const image = req.file
+
+    //using memory:
+    // const b64 = Buffer.from(req.file.buffer).toString('base64');
+    // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
 
     try {
 
@@ -20,15 +30,18 @@ async function addPlaylist(req, res) {
             return res.json({ success: false, message: 'isPublic should be either true or false!', errorCode: 'isArtistNotValid' })
         }
 
-        const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: 'image' })
+        //Using diskStorage:
+        const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: 'image', timeout: 1000*120})
 
+        //Using MemoryStorage:
+        // const imageUpload = await cloudinary.uploader.upload(dataURI, {resource_type: 'auto'} );
+        
         const playlistData = {
             name,
             desc,
             bgColor,
             isPublic,
             image: imageUpload.secure_url,
-            // duration,
         }
 
         const playlist = playlistModel(playlistData);

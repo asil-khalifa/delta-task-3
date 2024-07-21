@@ -34,7 +34,8 @@ export default function Navbar({setCollapsedSidebar}){
             {/* {SEARCH BAR:} */}
 
             <div className="flex items-center">
-                <input onChange={e => handleSearch(e.target.value)} className="w-[20vw] sm:w-[36vw] bg-[#121212] border border-slate-500 rounded-xl px-2 " type="text" placeholder="Search"/>
+                <input onChange={e => handleSearch(e.target.value)} className="w-[20vw] sm:w-[36vw] bg-[#121212] border border-slate-500 rounded-xl px-2 " type="text" 
+                placeholder={searchQuery.filter ? searchQuery.filter === 'songs'?'Search and listen to songs!':'Search either by name or username' : "Search"}/>
             </div>
 
             {/* {DJ Mode, Login, Logout, User Icon} */}

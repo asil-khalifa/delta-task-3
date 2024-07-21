@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuid } from 'uuid'
 import { useContext } from "react";
 import { PlayerContext } from "../context/PlayerContext";
@@ -16,6 +16,7 @@ export default function DisplayPlaylist({ setBgColor}) {
     const { id } = useParams();
     const { playWithId, playlistsData, songsData, track, setShowNoSongs } = useContext(PlayerContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [playlistData, setPlaylistData] = useState('');
 
@@ -53,7 +54,7 @@ export default function DisplayPlaylist({ setBgColor}) {
         setShowNoSongs(true);
     }, [playlistSongs])
     
-    const canEdit = (loggedIn && user.playlists.find(pId => pId === playlistData._id))?true:false;
+    const canEdit = (loggedIn && playlistData && user.playlists.find(pId => pId === playlistData._id))?true:false;
 
     return playlistData && playlistSongs ? (
         <>

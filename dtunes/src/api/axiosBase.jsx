@@ -5,10 +5,18 @@ const axiosBase =  axios.create({
     baseURL: baseUrl
 }) 
 
-export const axiosPrivate =  axios.create({
+export const axiosPrivate = axios.create({
     baseURL: baseUrl,
     headers: {
         'Content-Type': 'application/json',
+    },
+    withCredentials: true,
+}) 
+
+export const axiosPrivateFile = axios.create({
+    baseURL: baseUrl,
+    headers: {
+        'Content-Type': 'multipart/form-data',
     },
     withCredentials: true,
 }) 

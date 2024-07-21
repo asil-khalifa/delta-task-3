@@ -108,7 +108,8 @@ export default function EditPlaylist({ }) {
     return (
         <>
             <Navbar pageHeading="Add song to playlist" />
-            <a href={`/playlist/${playlistId}`}><button className="text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white cursor-pointer px-4 py-3 rounded-full">Back to Playlist</button></a>
+            {/* <a href={`/playlist/${playlistId}`}><button className="text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white cursor-pointer px-4 py-3 rounded-full">Back to Playlist</button></a> */}
+            <button onClick={() => navigate(`/playlist/${playlistId}`, {replace: true})} className="text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white cursor-pointer px-4 py-3 rounded-full">Back to Playlist</button>
             {loggedIn &&
                 <>
                     <ListOfSongs heading='Songs in Playlist' lastOption='Remove' color='red' data={includedSongs} clickFunc={removeSong} />

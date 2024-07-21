@@ -1,15 +1,58 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { assets } from '../assets/user/assets'
 import { PlayerContext } from '../context/PlayerContext'
+import { useNavigate } from 'react-router-dom';
 
 export default function Player() {
-    const { seekBgRef, seekBarRef, playing, play, pause, track, time, seekAudio, previous, next, nextRef } = useContext(PlayerContext);
+    const navigate = useNavigate();
+
+    const { seekBgRef, seekBarRef, playing, play, pause, track, seekAudio, previous, next, nextRef, audioRef } = useContext(PlayerContext);
+
+    const [time, setTime] = useState({
+        current: {
+            second: 0,
+            minute: 0,
+        },
+        total: {
+            second: 0,
+            minute: 0,
+        }
+
+    });
+
     const zeroFormat = { current: time.current.second < 10, total: time.total.second < 10 }
+
+    function displaySong(){
+        navigate(`/song/${track._id}`);
+    }
+
+    useEffect(() => {
+        const audio = audioRef?.current;
+        if (!audio || !seekBarRef?.current) return;
+
+        audio.ontimeupdate = () => {
+            try {
+                seekBarRef.current.style.width = `${audio.currentTime / audio.duration * 100}%`
+                setTime({
+                    current: {
+                        second: Math.floor(audio.currentTime % 60),
+                        minute: Math.floor(audio.currentTime / 60),
+                    },
+                    total: {
+                        second: Math.floor(audio.duration % 60),
+                        minute: Math.floor(audio.duration / 60),
+                    }
+                })
+            } catch (err) {
+            }
+        }
+    }, [audioRef])
+
     return track ? (
         <div className="h-[10%] bg-black flex justify-between items-center text-white px-4">
 
             {/* Display of song name, image */}
-            <div className="hidden md:flex w-[20%] items-center gap-4">
+            <div onClick={displaySong} title='Click for song lyrics' className="hidden md:flex w-[20%] items-center gap-4 px-3 py-2 hover:bg-[#ffffff30] active:bg-[#ffffff40]">
                 <img className="w-12" src={track.image} alt="Song Image" />
                 <div>
                     <p>{track.name}</p>
@@ -17,7 +60,7 @@ export default function Player() {
                 </div>
             </div>
                 {/* On small screen */}
-            <div className='flex items-center md:hidden'>
+            <div onClick={displaySong} title='Click for song lyrics' className='flex items-center md:hidden hover:bg-[#ffffff30] active:bg-[#ffffff40]'>
                 <img className="w-10" src={track.image} alt="Song Image" />
             </div>
 

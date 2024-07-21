@@ -1,16 +1,24 @@
 import { useEffect } from "react";
-import { axiosPrivate } from "../api/axiosBase";
+import { axiosPrivate, axiosPrivateFile } from "../api/axiosBase";
 import useAuth from "./useAuth";
 import useRefreshToken from "./useRefreshToken";
 
 
-export default function useAxiosPrivate(){
+export default function useAxiosPrivate(acceptFiles=false){
     const refresh = useRefreshToken();
     const {auth} = useAuth();
 
+    let axiosUsed;
+    if (acceptFiles){
+        axiosUsed = axiosPrivateFile;
+    }
+    else{
+        axiosUsed = axiosPrivate;
+    }
+
     useEffect(() => {
 
-        const requestIntercept = axiosPrivate.interceptors.request.use(
+        const requestIntercept = axiosUsed.interceptors.request.use(
             config => {
                 if (!config.headers['Authorization']){
                     config.headers['Authorization'] = `Bearer ${auth?.accessToken}`;
@@ -21,7 +29,7 @@ export default function useAxiosPrivate(){
 
         )
 
-        const responseIntercept = axiosPrivate.interceptors.response.use(
+        const responseIntercept = axiosUsed.interceptors.response.use(
             response => response,
             async (error) => {
                 const prevRequest = error?.config;
@@ -30,7 +38,7 @@ export default function useAxiosPrivate(){
                     prevRequest.sent = true;
                     const newAccessToken = await refresh();
                     prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
-                    return axiosPrivate(prevRequest);
+                    return axiosUsed(prevRequest);
                 }
                 return Promise.reject(error);
             }
@@ -38,10 +46,10 @@ export default function useAxiosPrivate(){
 
         //use Effect cleanup function clears the interceptors added, to prevent them from piling up.
         return () => {
-            axiosPrivate.interceptors.request.eject(requestIntercept);
-            axiosPrivate.interceptors.response.eject(responseIntercept);
+            axiosUsed.interceptors.request.eject(requestIntercept);
+            axiosUsed.interceptors.response.eject(responseIntercept);
         }
     }, [auth, refresh])
 
-    return axiosPrivate;
+    return axiosUsed;
 }

@@ -18,7 +18,8 @@ export default function AddPlaylist({ }) {
 
     const { auth } = useAuth();
     const { loggedIn, user } = auth;
-    const axiosPrivate = useAxiosPrivate();
+    //add file to true
+    const axiosPrivateFile = useAxiosPrivate(true);
     
     async function submitHandler(e) {
         e.preventDefault();
@@ -36,7 +37,7 @@ export default function AddPlaylist({ }) {
             formData.append('userId', user._id);
 
             const response = await toast.promise(
-                axiosPrivate.post(`/api/playlists`, formData),
+                axiosPrivateFile.post(`/api/playlists`, formData),
                 {
                     pending: 'Uploading... Please wait',
                 }

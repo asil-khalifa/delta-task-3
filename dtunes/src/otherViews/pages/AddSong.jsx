@@ -13,7 +13,8 @@ export default function AddSong({ }) {
 
     const { auth } = useAuth();
     const { loggedIn, user } = auth;
-    const axiosPrivate = useAxiosPrivate();
+    //set use files to true
+    const axiosPrivateFile = useAxiosPrivate(true);
 
     async function submitHandler(e) {
         if (e) e.preventDefault();
@@ -25,7 +26,7 @@ export default function AddSong({ }) {
             formData.append('audio', song);
 
             const response = await toast.promise(
-                axiosPrivate.post(`/api/songs`, formData),
+                axiosPrivateFile.post(`/api/songs`, formData),
                 {
                     pending: 'Uploading... Please wait',
                 }

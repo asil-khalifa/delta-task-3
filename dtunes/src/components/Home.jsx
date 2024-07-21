@@ -52,7 +52,7 @@ export default function Home({ setBgColor }) {
             {/* DISPLAY OF PLAYLISTS: */}
             <div className="mb-4">
                 <h1 className="my-5 font-bold text-2xl">Playlists</h1>
-                <div className="flex overflow-auto">
+                <div className="flex overflow-x-auto">
                     {/* liked songs: */}
                     <PlaylistItem key={uuid()} likedSongs={true} image={assets.like_icon} name='Liked Songs' desc='Find all songs you liked here' />
                     {/* All playlists */}

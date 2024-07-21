@@ -1,8 +1,12 @@
 import { v2 as cloudinary } from 'cloudinary';
 import songModel from '../models/song.js'
 import userModel from '../models/user.js';
+import { getSongLyrics } from '../utils.js';
 
 async function addSong(req, res) {
+    console.log(Object.keys(req));
+    console.log(req.body);
+    
     const { name, desc } = req.body;
     const { image, audio } = req.files;
 
@@ -151,6 +155,41 @@ async function addDislike(req, res){
     }
 }
 
+async function songLyrics(req, res){
+    try{
+
+        //song display with lyrics:
+        const {id} = req.params;
+        const song = await songModel.findById(id);
+        if(!song) return res.json({success: false, errorCode: 'songNotExists'});
+        
+        //if lyrics not in db, fetch and store in db to reduce lyrics api calls
+        if (!song.lyrics){
+            const songName = song.name;
+            const lyricsResponse = await getSongLyrics(songName);
+    
+            if (lyricsResponse.success){
+                // return res.json({success: true, lyrics: lyricsResponse.lyrics});
+                song.lyrics = lyricsResponse.lyrics;
+                song.save();
+            }
+            else if (lyricsResponse.errorCode === 'noMatch'){
+                song.lyrics = 'No lyrics available for this song.';
+                song.save();
+            }
+            else{
+                return res.json({...lyricsResponse});
+            }
+        }
+        return res.json({success: true, lyrics: song.lyrics});
+
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, errorCode: 'unknownError', message: 'controllers>song.js>songLyrics'});
+    }
+
+}
+
 // async function seedUserLikes(req, res){
 //     const response = await userModel.updateMany({}, {$set: {likedSongs: [], dislikedSongs: []}});
 //     console.log(response);
@@ -163,6 +202,12 @@ async function addDislike(req, res){
 // }
 
 
-export { addSong, listSong, removeSong, addLike, addDislike};
+// async function seedSongLyrics(req, res){
+//     const response = await songModel.updateMany({}, {$set: {lyrics: ''}})
+//     res.send('done')
+    
+// }
 
-// export {seedSongLikes};
+export { addSong, listSong, removeSong, addLike, addDislike, songLyrics};
+
+// export {seedSongLyrics};

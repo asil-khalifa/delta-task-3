@@ -1,6 +1,5 @@
 import { createContext, useEffect, useRef, useState } from "react";
-// import { songsData } from "../assets/user/assets";
-import axios, { all } from 'axios';
+import axios from 'axios';
 import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
 
@@ -30,17 +29,18 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     const [track, setTrack] = useState({});
     const [playing, setPlaying] = useState(false);
 
-    const [time, setTime] = useState({
-        current: {
-            second: 0,
-            minute: 0,
-        },
-        total: {
-            second: 0,
-            minute: 0,
-        }
+    //Moving to timecontext
+    // const [time, setTime] = useState({
+    //     current: {
+    //         second: 0,
+    //         minute: 0,
+    //     },
+    //     total: {
+    //         second: 0,
+    //         minute: 0,
+    //     }
 
-    });
+    // });
 
     //api:
     const [songsData, setSongsData] = useState([]);
@@ -235,7 +235,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         seekBarRef,
         track, setTrack,
         playing, setPlaying,
-        time, setTime,
+        // time, setTime,
         play, pause,
         seekAudio,
         playWithId,
@@ -294,28 +294,25 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     // console.log('track:',track, 'isplaying:', playing);
 
-    useEffect(() => {
-        const audio = audioRef.current;
-        audio.ontimeupdate = () => {
-            try {
-
-                seekBarRef.current.style.width = `${audio.currentTime / audio.duration * 100}%`
-                setTime({
-                    current: {
-                        second: Math.floor(audio.currentTime % 60),
-                        minute: Math.floor(audio.currentTime / 60),
-                    },
-                    total: {
-                        second: Math.floor(audio.duration % 60),
-                        minute: Math.floor(audio.duration / 60),
-                    }
-                })
-            } catch (err) {
-                console.log('ontimeUpdate error:', err);
-            }
-
-        }
-    }, [audioRef])
+    // useEffect(() => {
+    //     const audio = audioRef.current;
+    //     audio.ontimeupdate = () => {
+    //         try {
+    //             seekBarRef.current.style.width = `${audio.currentTime / audio.duration * 100}%`
+    //             setTime({
+    //                 current: {
+    //                     second: Math.floor(audio.currentTime % 60),
+    //                     minute: Math.floor(audio.currentTime / 60),
+    //                 },
+    //                 total: {
+    //                     second: Math.floor(audio.duration % 60),
+    //                     minute: Math.floor(audio.duration / 60),
+    //                 }
+    //             })
+    //         } catch (err) {
+    //         }
+    //     }
+    // }, [audioRef])
 
     //automatically go to next song once one is over.
     useEffect(() => {

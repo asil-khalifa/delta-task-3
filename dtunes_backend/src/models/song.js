@@ -28,7 +28,10 @@ const songSchema = new mongoose.Schema({
     dislikes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-    }]
+    }],
+    lyrics: {
+        type: String,
+    }
 
 })
 
