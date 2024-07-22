@@ -4,15 +4,17 @@ import App from './App.jsx'
 import './index.css'
 
 import { BrowserRouter } from 'react-router-dom';
-import {AuthProvider} from './context/AuthProvider.jsx';
+import { AuthProvider } from './context/AuthProvider.jsx';
+import { socket, SocketProvider } from './context/SocketContext.jsx';
 
-// let backendUrl = 'http://localhost:2006';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <SocketProvider value={socket}>
+          <App />
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,

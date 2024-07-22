@@ -11,9 +11,23 @@ import cookieParser from 'cookie-parser';
 import refreshRouter from './src/routes/refresh.js';
 import logoutRouter from './src/routes/logout.js';
 
+import { Server } from 'socket.io';
+import http from 'http'
+import { startSocket } from './sockets.js';
+
 //App config:
 
 const app = express();
+const server = http.createServer(app);
+
+app.use(cors({origin: true, credentials: true}));
+
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    }
+});
 const port = 2006;
 
 connectDb();
@@ -28,7 +42,6 @@ app.use(express.json())
 //     next();
 // })
 
-app.use(cors({origin: true, credentials: true}));
 app.use(cookieParser());
 
 //routes:
@@ -42,4 +55,9 @@ app.get('/', (req, res) => {
     res.send('Server working')
 })
 
-app.listen(port, () => console.log(`Express Server Online in port ${port}`));
+
+//socket.io
+export {io};
+startSocket();
+
+server.listen(port, () => console.log(`Express Server Online in port ${port}`));

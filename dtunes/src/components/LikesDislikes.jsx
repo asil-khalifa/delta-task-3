@@ -28,8 +28,8 @@ export default function LikesDislikes({ likes, dislikes, songId }) {
         else toast.info('Dislike added, reload page to see');
     }
 
-    let likedClasses = `bg-green-950 rounded-xl px-1`;
-    let dislikedClasses = `bg-red-950 rounded-xl px-1`;
+    let likedClasses = `bg-green-950 rounded-xl px-1 text-sm lg:text-base`;
+    let dislikedClasses = `bg-red-950 rounded-xl px-1 text-sm lg:text-base`;
 
     function checkLiked() {
         if (user && user.likedSongs.find(sId => sId === songId)) {

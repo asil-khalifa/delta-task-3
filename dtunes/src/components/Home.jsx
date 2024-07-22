@@ -18,16 +18,22 @@ export default function Home({ setBgColor }) {
     const { loggedIn, user } = auth;
     const axiosPrivate = useAxiosPrivate();
 
-    async function testPrivate() {
-        try {
-            const response = await axiosPrivate.get('/api/users/testing/privatetest');
-            console.log(response.data);
-        } catch (err) {
-            console.log('RefreshToken expired, navigating to login screen')
-            navigate('/users/new', { state: { from: location }, replace: true })
-        }
-    }
+    // async function testPrivate() {
+    //     try {
+    //         const response = await axiosPrivate.get('/api/users/testing/privatetest');
+    //         console.log(response.data);
+    //     } catch (err) {
+    //         console.log('RefreshToken expired, navigating to login screen')
+    //         navigate('/users/new', { state: { from: location }, replace: true })
+    //     }
+    // }
 
+    function createParty(){
+        
+    }
+    function joinParty() {
+
+    }
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -70,9 +76,11 @@ export default function Home({ setBgColor }) {
                 {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} currentlyPlaying={track._id && track._id === sd._id} />)}
             </DisplaySongsUsers>
 
-            <button onClick={testPrivate}>
+            {/* <button onClick={testPrivate}>
                 Refresh: Test Private
-            </button>
+            </button> */}
+            <button onClick={createParty}>Create Party</button>
+            <button onClick={joinParty}>Join Party</button>
         </>
     )
 }

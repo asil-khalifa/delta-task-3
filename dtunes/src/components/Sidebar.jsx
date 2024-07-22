@@ -39,7 +39,7 @@ export default function Sidebar({ collapsed = true }) {
 
             </div>
 
-            <div className="bg-[#121212] h-[85%] rounded">
+            <div className="bg-[#121212] h-[90%] rounded">
                 <div className='p-4 flex items-center justify-between '>
                     <div className='flex items-center gap-3'>
                         <img className='w-8' src={assets.stack_icon} alt="stack" />

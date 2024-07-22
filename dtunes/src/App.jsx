@@ -9,7 +9,6 @@ function App() {
     return (
         <>
             <Routes>
-
                 <Route path='/playlists/new/*' element={<OtherViewsMain  requestedPath='/playlists/new' />}/>
                 <Route path='/songs/new/*' element={<OtherViewsMain requestedPath='/songs/new' />}/>
                 <Route path='/playlists/:id/add-song' element={<OtherViewsMain requestedPath='/playlists/:id/add-song'/>}/>
