@@ -3,6 +3,7 @@ import { assets } from '../assets/user/assets'
 import { PlayerContext } from '../context/PlayerContext'
 import { useNavigate } from 'react-router-dom';
 
+
 export default function Player() {
     const navigate = useNavigate();
 
@@ -22,7 +23,7 @@ export default function Player() {
 
     const zeroFormat = { current: time.current.second < 10, total: time.total.second < 10 }
 
-    function displaySong(){
+    function displaySong() {
         navigate(`/song/${track._id}`);
     }
 
@@ -43,6 +44,7 @@ export default function Player() {
                         minute: Math.floor(audio.duration / 60),
                     }
                 })
+
             } catch (err) {
             }
         }
@@ -59,7 +61,7 @@ export default function Player() {
                     <p>{track.desc.slice(0, 12)}...</p>
                 </div>
             </div>
-                {/* On small screen */}
+            {/* On small screen */}
             <div onClick={displaySong} title='Click for song lyrics' className='flex items-center md:hidden hover:bg-[#ffffff30] active:bg-[#ffffff40]'>
                 <img className="w-10" src={track.image} alt="Song Image" />
             </div>

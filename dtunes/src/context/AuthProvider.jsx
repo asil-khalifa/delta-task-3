@@ -22,7 +22,8 @@ export function AuthProvider({children}){
             }
         }
         catch(err){
-            console.log(err);
+            // console.log(err);
+            console.log('user needs to login, refresh token expired')
             setAuth({loggedIn: false})
         }
     }

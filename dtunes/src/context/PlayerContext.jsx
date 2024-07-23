@@ -1,7 +1,8 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import axios from 'axios';
 import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
+import { SocketContext } from "./SocketContext";
 
 function shuffleArray(arr) {
     'Shuffles array AND RETURNS'
@@ -28,6 +29,10 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     const [track, setTrack] = useState({});
     const [playing, setPlaying] = useState(false);
+    
+    const {socket} = useContext(SocketContext);
+    // console.log('socket', Object.keys(socket));
+
 
     //Moving to timecontext
     // const [time, setTime] = useState({
@@ -201,14 +206,22 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     }
 
+    // sockets:
+    // send playing song to friends:
+    function sendPlay(trackId, currentTime){
+        socket.emit('sendPlay', {trackId, currentTime})
+    }
+
     async function play() {
         try {
             //if songs data have not yet been filtered, but in playlist: 
             if (curLocation.pathname.indexOf('playlist') !== -1 && !withinPlaylist) getSongs();
             const result = await audioRef.current.play()
             setPlaying(true);
+            sendPlay(track?._id, audioRef?.current?.currentTime)
         } catch (err) {
             setPlaying(false);
+            console.log(err);
         }
 
     }
@@ -291,28 +304,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     useEffect(() => {
         pause();
     }, []);
-
-    // console.log('track:',track, 'isplaying:', playing);
-
-    // useEffect(() => {
-    //     const audio = audioRef.current;
-    //     audio.ontimeupdate = () => {
-    //         try {
-    //             seekBarRef.current.style.width = `${audio.currentTime / audio.duration * 100}%`
-    //             setTime({
-    //                 current: {
-    //                     second: Math.floor(audio.currentTime % 60),
-    //                     minute: Math.floor(audio.currentTime / 60),
-    //                 },
-    //                 total: {
-    //                     second: Math.floor(audio.duration % 60),
-    //                     minute: Math.floor(audio.duration / 60),
-    //                 }
-    //             })
-    //         } catch (err) {
-    //         }
-    //     }
-    // }, [audioRef])
 
     //automatically go to next song once one is over.
     useEffect(() => {

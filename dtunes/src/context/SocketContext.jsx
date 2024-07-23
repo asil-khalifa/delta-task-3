@@ -10,10 +10,6 @@ export const SocketProvider = ({ children }) => {
     const { auth } = useAuth();
     const { loggedIn, user } = auth;
 
-    // socket = socketio.connect('http://localhost:2006', {
-    //     query: obj,
-    // })
-
     useEffect(() => {
         function onConnect() {
             setIsConnected(true);
@@ -37,11 +33,16 @@ export const SocketProvider = ({ children }) => {
         socket.emit('authChange', { loggedIn, userId: user?._id });
     }, [loggedIn, user?._id])
 
+    //used by server for handling user reloading page when logged in:
+    // useEffect(() => {
+    //     socket.on('getUserAuth', () => {
+    //         socket.emit('authChange', { loggedIn, userId: user?._id });
+    //     })
+    // }, [loggedIn, user?._id])
+
     return (
-        <>
+        <SocketContext.Provider value={{ socket }}>
             {children}
-        </>
+        </SocketContext.Provider>
     )
 }
-
-export { socket };
