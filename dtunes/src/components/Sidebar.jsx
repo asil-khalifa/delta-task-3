@@ -73,8 +73,6 @@ export default function Sidebar({ collapsed = true }) {
         if(!loggedIn) setFriendSongs([]);
     }, [loggedIn]);
 
-    console.log(friendSongs);
-
     return (
         <div className={`overflow-auto w-[75%] sm:w-[50%] lg:w-[25%] h-full p-2 ${collapsed && 'hidden'} absolute lg:static lg:flex flex-col gap-2 text-white`}>
             <div className="bg-[#121212] h-[10%] rounded flex flex-col justify-around">

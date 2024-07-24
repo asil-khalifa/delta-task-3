@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify'
 import { useLocation } from "react-router-dom";
 import { SocketContext } from "./SocketContext";
+import axiosBase from "../api/axiosBase";
 
 function shuffleArray(arr) {
     'Shuffles array AND RETURNS'
@@ -29,23 +30,9 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     const [track, setTrack] = useState({});
     const [playing, setPlaying] = useState(false);
-    
-    const {socket} = useContext(SocketContext);
-    // console.log('socket', Object.keys(socket));
 
+    const { socket } = useContext(SocketContext);
 
-    //Moving to timecontext
-    // const [time, setTime] = useState({
-    //     current: {
-    //         second: 0,
-    //         minute: 0,
-    //     },
-    //     total: {
-    //         second: 0,
-    //         minute: 0,
-    //     }
-
-    // });
 
     //api:
     const [songsData, setSongsData] = useState([]);
@@ -62,6 +49,8 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
     //See Normal.jsx, this helps to override songsData being empty 
     const [showNoSongs, setShowNoSongs] = useState(false);
+
+    //syncing:
 
     async function getSongs() {
         let response;
@@ -108,9 +97,15 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
                 //Only if track is not set, set it to the first available song
                 if (!Object.keys(track).length) {
-                    setTrack(t => {
-                        if (songsAvailable) return songsAvailable[0];
-                    })
+                    console.log('changing from here', track);
+                    if (songsAvailable){
+
+                        setTrack(t => {
+                           return songsAvailable[0];
+                       })
+
+                       sendSyncTrack(songsAvailable[0]._id);
+                    }
                 }
             }
             else {
@@ -207,21 +202,93 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     }
 
     // sockets:
+
     // send playing song to friends:
-    function sendPlay(trackId, currentTime){
-        socket.emit('sendPlay', {trackId, currentTime})
+    function sendFriendTrack(trackId) {
+        socket.emit('sendFriendTrack', { trackId })
     }
+
+    // send playing song to sync playback:
+    function sendSyncTrack(trackId) {
+        if(!trackId) trackId = track?._id;
+        if (!trackId) return;
+
+        console.log('sent trackId from here', trackId);
+        socket.emit('sendSyncTrack', { trackId })
+
+    }
+
+    //send duration to sync playback:
+    function sendSyncDuration(duration) {
+
+        console.log('sent duration from here');
+        socket.emit('sendDuration', { duration });
+    }
+
+
+    //set track to track sent from server:
+    useEffect(() => {
+        socket.on('getTrack', async ({ trackId }) => {
+            try {
+                const response = await axiosBase(`/api/songs/${trackId}`);
+                if (response.data.success) {
+                    //! Remove timeout if better method implemented.
+                    //1000 and 1500 were the time durations
+                    // setTimeout(() => setTrack(response.data.song), 15);
+                    if (trackId !== track?._id) {
+                        console.log('changed track to (see yeah)')
+                        setTrack(response.data.song);
+                    }
+                    console.log('earlier track:', track)
+
+                    console.log('yeah', response.data.song);
+                }
+                else {
+                    console.log(response);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        })
+    }, [])
+    useEffect(() => {
+        console.log('track changed to: ', track);
+    }, [track]);
+
+    // console.log('trackkk', track);
+    //set duration to duration sent from server:
+    useEffect(() => {
+        socket.on('getDuration', async ({ duration }) => {
+            try {
+                //!same or more setTimeout as above
+                console.log('here');
+                // setTimeout(() => audioRef.current.currentTime = duration, 15);
+                audioRef.current.currentTime = duration;
+            } catch (err) {
+                console.log(err);
+            }
+        })
+    }, [])
+
+    //send trackId upon its change
+    useEffect(() => {
+        if (track?._id) {
+            sendFriendTrack(track._id)
+            // sendSyncTrack(track._id);
+        }
+    }, [track?._id]);
 
     async function play() {
         try {
+
             //if songs data have not yet been filtered, but in playlist: 
             if (curLocation.pathname.indexOf('playlist') !== -1 && !withinPlaylist) getSongs();
             const result = await audioRef.current.play()
             setPlaying(true);
-            sendPlay(track?._id, audioRef?.current?.currentTime)
+
         } catch (err) {
             setPlaying(false);
-            console.log(err);
+            // console.log(err);
         }
 
     }
@@ -231,11 +298,27 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         setPlaying(false);
     }
 
+    //Sync playback: handle pause and play:
+
+    useEffect(() => {
+        socket.on('getPause', () => {
+            pause();
+        })
+    }, [socket])
+
+    useEffect(() => {
+        socket.on('getPlay', () => {
+            play();
+        })
+    }, [socket])
+
+    //user clicks on progress bar:
     function seekAudio(e) {
         try {
             const { x: X, y: Y, width } = seekBgRef.current.getBoundingClientRect()
             const fractionTime = (e.clientX - X) / width;
             audioRef.current.currentTime = fractionTime * audioRef.current.duration;
+            sendSyncDuration(audioRef.current.currentTime);
         }
         catch (err) {
             console.log(err);
@@ -259,17 +342,24 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         showNoSongs, setShowNoSongs,
         usersData, setUsersData,
         nextRef,
+        sendSyncTrack,
     }
 
     async function playWithId(id) {
         await setTrack(songsData.find(song => song._id === id))
+
+        //Because this is called only by user click, we can do sendSyncTrack
+        sendSyncTrack(id);
         // play();
     }
 
     async function previous() {
         songsData.map((song, idx) => {
             if (song._id === track._id && idx > 0) {
-                setTrack(songsData[idx - 1]);
+                let track_ = songsData[idx - 1];
+                setTrack(track_);
+
+                sendSyncTrack(track_._id);
                 // play();
             }
         })
@@ -278,17 +368,25 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     async function next() {
         songsData.map((song, idx) => {
             if (song._id === track._id) {
-                if (idx < songsData.length - 1){
-                    setTrack(songsData[idx + 1]);
+                let track_;
+
+                if (idx < songsData.length - 1) {
+                    // setTrack(songsData[idx + 1]);
+                    track_ = songsData[idx + 1];
                 }
                 //if last song, go to first
-                else if (idx === songsData.length -1){
-                    setTrack(songsData[0]);
+                else if (idx === songsData.length - 1) {
+                    // setTrack(songsData[0]);
+                    track_ = songsData[0];
                 }
+                else return;
+
+                setTrack(track_);
+                sendSyncTrack(track_._id);
             }
         })
     }
-    
+
     //Play song upon change in track:
     useEffect(() => {
         try {

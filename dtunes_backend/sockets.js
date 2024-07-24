@@ -70,7 +70,7 @@ async function toAllFriends(user, func, debugMessage) {
     const sockets = await io.fetchSockets();
     const userDb = await userModel.findById(user.userId);
     if (!userDb) {
-        console.log('Warning: in sendPlay no user found in db');
+        console.log('Warning: in toAllFriends no user found in db');
         return false;
     }
     const friends = userDb.friends.accepted;
@@ -85,6 +85,30 @@ async function toAllFriends(user, func, debugMessage) {
     }
 }
 
+
+//Sync playback:
+// function setNewLoginTrack(socket, ogUser){
+//     console.log('here', ogUser.trackId);
+//     if(ogUser.trackId) socket.emit('getTrack', {trackId: ogUser.trackId});
+// }
+
+// async function setNewLoginDuration(socket, ogUser){
+//     console.log('hi');
+//     // if(ogUser.trackId) socket.emit('getDuration', {trackId: ogUser.trackId});
+//     const sockets = await io.fetchSockets();
+//     const firstSocket = sockets.find(s=>s.id === ogUser.socketIds[0]);
+//     if(ogUser.trackId) firstSocket.emit('durationRequest', duration => {
+//         console.log('here2', duration);
+//         socket.emit('getDuration', {duration});
+//     });
+
+// }
+
+// function sendSyncedState(socket, state){
+//     socket.emit('getSyncedState', state);
+// }
+
+
 function startSocket() {
 
     io.on('connection', socket => {
@@ -93,7 +117,7 @@ function startSocket() {
 
         socket.on('disconnect', async reason => {
             try {
-
+                // sendSyncedState(socket, false);
                 // console.log(socket.id, reason, findUserBySocketId(socket.id));
                 const user = findUserBySocketId(socket.id);
 
@@ -127,16 +151,16 @@ function startSocket() {
                 if (user) {
                     //socket is now logging in
                     if (loggedIn) {
-
+                        //if user was already loggedin:
+                        //  if different userid, disassociate this socket.id with the earlier userId
+                        //  if same, do nothing
                         if (user.loggedIn) {
-                            //if user was already loggedin:
-                            //  if different userid, disassociate this socket.id with the earlier userId
-                            //  if same, do nothing
                             if (user.userId !== userId) {
                                 //don't leave empty users
                                 if (user.socketIds.length > 1) {
                                     user.socketIds.splice(user.socketIds.indexOf(socket.id));
                                     users.loggedIn.push(new User(socket.id, true, userId));
+                                    // sendSyncedState(socket, true);
                                 }
                                 else {
                                     user.userId = userId;
@@ -152,11 +176,19 @@ function startSocket() {
                             const anotherUser = findUserByUserId(userId);
                             if (anotherUser) {
                                 anotherUser.socketIds.push(socket.id);
+
+                                //2nd point of sync playback, set track_id of this new user to given track id
+                                // setTimeout(() => {
+                                // setTimeout(() => setNewLoginTrack(socket, anotherUser), 1250);
+                                // setTimeout(() => setNewLoginDuration(socket, anotherUser), 1250)
+                                // }, 100);
                             }
                             else {
                                 user.setLoggedIn(true);
                                 user.setUserId(userId);
                                 users.loggedIn.push(user);
+                                // sendSyncedState(socket, true);
+
                             }
                         }
                     }
@@ -214,21 +246,106 @@ function startSocket() {
             // console.log(socket.rooms);
         })
 
-        //socket emits sendPlay: for showing playing song to friends
-        socket.on('sendPlay', async ({ trackId, currentTime }) => {
-            console.log('sendPlay', trackId, currentTime);
+        //socket emits sendFriendTrack: for showing playing song to friends
+        socket.on('sendFriendTrack', async ({ trackId }) => {
+            try{
 
-            const user = findUserBySocketId(socket.id);
-            if (!user?.loggedIn) return;
-
-            const trackDb = await songModel.findById(trackId);
-
-            toAllFriends(user, (fSocket, userDb) => {
-                fSocket.emit('getFriendSong', { username: userDb.username, name: userDb.name, trackId, trackName: trackDb.name, profileColor: userDb.profileColor, isArtist: userDb.isArtist });
-            });
+                const user = findUserBySocketId(socket.id);
+                if (!user?.loggedIn) return;
+    
+                const trackDb = await songModel.findById(trackId);
+    
+                toAllFriends(user, (fSocket, userDb) => {
+                    fSocket.emit('getFriendSong', { username: userDb.username, name: userDb.name, trackId, trackName: trackDb.name, profileColor: userDb.profileColor, isArtist: userDb.isArtist });
+                });
+            }catch(err){
+                console.log('error in sockets.js show playing song to friends', err);
+            }
 
         })
 
+        //-------- SYNC PLAYBACK----------------
+
+            // 1. socket emits sendSyncTrack: when the track is changed, this is sent
+        socket.on('sendSyncTrack', async ({trackId}) => {
+            try{
+                const user = findUserBySocketId(socket.id);
+                if (user && trackId){
+                    console.log('here4');
+                    user.trackId = trackId;
+
+                    const sockets = await io.fetchSockets();
+                    const otherSocketIds = user.socketIds.filter(sId => sId!==socket.id);
+
+                    sockets.forEach(s => {
+                        if (otherSocketIds.find(sId => sId===s.id)){
+                            console.log('hi');
+                            s.emit('getTrack', {trackId});
+                        }
+                    })
+                }
+                // console.log('socket:', socket.id, trackId, 'current:', user.trackId);
+            }catch(err){
+                console.log('error in sendSyncTrack', err);
+            }
+        })
+        //(NOT IMPLEMENTED) Note: a user is blocked from sending syncPlay until they get a sync play from others (2nd login) or they're the first login - handled via synced state in PlayerContext
+
+
+            //2 when logging in, we're checking if same userId has loggedin and if so
+            //A. new login's track is set
+            //search for setNewLoginTrack for implementation
+            
+            //B. emit request for latest duration from first socketId and set this socketId to that
+            //search for setNewLoginDuration for implementation
+
+        //3. When user clicks on progress bar, emit sendDuration to server and set it
+        //in playerContext.jsx search for sendSyncDuration 
+        //in this file, search sendSyncedState
+
+        socket.on('sendDuration', async ({duration}) => {
+            try{
+                const user = findUserBySocketId(socket.id);
+                if(!user) throw new Error('No user found');
+
+                let otherSocketIds = user.socketIds.filter(sId => sId!==socket.id);
+                if(!otherSocketIds.length) return;
+
+                const sockets = await io.fetchSockets();
+                sockets.forEach(s => {
+                    if(otherSocketIds.find(sId => sId === s.id)){
+                        s.emit('getDuration', {duration});
+                    }
+                })
+            }catch(err){
+                console.log('error in sendDuration', err);
+            }
+        })
+
+        socket.on('sendPause', async () => {
+            const user = findUserBySocketId(socket.id);
+            const sockets = await io.fetchSockets();
+            const otherSocketIds = user.socketIds.filter(sId => sId!==socket.id);
+
+            sockets.forEach(s => {
+                if (otherSocketIds.find(sId=> sId===s.id)){
+                    s.emit('getPause');
+                }
+            })
+        })
+
+        socket.on('sendPlay', async () => {
+            const user = findUserBySocketId(socket.id);
+            const sockets = await io.fetchSockets();
+            const otherSocketIds = user.socketIds.filter(sId => sId!==socket.id);
+
+            sockets.forEach(s => {
+                if (otherSocketIds.find(sId=> sId===s.id)){
+                    s.emit('getPlay');
+                }
+            })
+        })
+            
     })
 }
 

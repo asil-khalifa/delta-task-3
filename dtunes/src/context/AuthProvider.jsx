@@ -8,7 +8,7 @@ export function AuthProvider({children}){
     const location = useLocation();
 
     async function getUserAuth(){
-        console.log('getting user auth...')
+        // console.log('getting user auth...')
         try{
             const response = await axiosBase.get('/refresh', {
                 withCredentials: true,

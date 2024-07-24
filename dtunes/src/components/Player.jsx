@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react'
 import { assets } from '../assets/user/assets'
 import { PlayerContext } from '../context/PlayerContext'
 import { useNavigate } from 'react-router-dom';
+import { SocketContext } from '../context/SocketContext';
 
 
 export default function Player() {
@@ -50,6 +51,23 @@ export default function Player() {
         }
     }, [audioRef])
 
+    const {socket} = useContext(SocketContext);
+    useEffect(() => {
+        socket.on('durationRequest', cb => {
+            cb(audioRef.current.currentTime)
+        })
+    })
+
+    function handlePause(){
+        pause();
+        socket.emit('sendPause');
+    }
+
+    function handlePlay(){
+        play();
+        socket.emit('sendPlay');
+    }
+
     return track ? (
         <div className="h-[10%] bg-black flex justify-between items-center text-white px-4">
 
@@ -70,8 +88,8 @@ export default function Player() {
                 <div className='flex gap-4'>
                     <img onClick={previous} className='w-4 cursor-pointer' src={assets.prev_icon} alt="previous" />
                     {playing
-                        ? <img onClick={pause} className='w-4 cursor-pointer' src={assets.pause_icon} alt="pause" />
-                        : <img onClick={play} className='w-4 cursor-pointer' src={assets.play_icon} alt="play" />
+                        ? <img onClick={handlePause} className='w-4 cursor-pointer' src={assets.pause_icon} alt="pause" />
+                        : <img onClick={handlePlay} className='w-4 cursor-pointer' src={assets.play_icon} alt="play" />
                     }
                     <img ref={nextRef} onClick={next} className='w-4 cursor-pointer' src={assets.next_icon} alt="next" />
                 </div>

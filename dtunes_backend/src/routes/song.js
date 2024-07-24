@@ -1,6 +1,6 @@
 //ROUTES:
 
-import { addDislike, addLike, addSong, songLyrics, listSong, removeSong } from "../controllers/song.js";
+import { addDislike, addLike, addSong, songLyrics, listSong, removeSong, getSongDetails } from "../controllers/song.js";
 import express from 'express'
 import upload from '../middleware/multer.js'
 import { authenticateToken } from "../../auth.js";
@@ -20,7 +20,7 @@ songRouter.post('/', authenticateToken,
     addSong);
 
 songRouter.get('/', listSong);
-
+songRouter.get('/:id', getSongDetails);
 //lyrics:
 songRouter.get('/:id/lyrics', songLyrics);
 

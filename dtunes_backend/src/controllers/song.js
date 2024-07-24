@@ -51,6 +51,19 @@ async function listSong(req, res) {
     }
 }
 
+async function getSongDetails(req, res) {
+    try {
+        const {id} = req.params;
+        const song = await songModel.findById(id);
+        if(song) return res.json({success: true, song});
+        return res.json({success: false, message: 'Id invalid'})
+        
+    } catch (error) {
+        return res.json({success: false, message: 'controllers>song.js>getSongDetails'})
+        console.log('controllers>song.js>getSongDetails', error);
+    }
+}
+
 async function removeSong(req, res) {
     try {
         const { id } = req.params;
@@ -208,6 +221,6 @@ async function songLyrics(req, res){
     
 // }
 
-export { addSong, listSong, removeSong, addLike, addDislike, songLyrics};
+export { addSong, listSong, removeSong, addLike, addDislike, songLyrics, getSongDetails};
 
 // export {seedSongLyrics};
