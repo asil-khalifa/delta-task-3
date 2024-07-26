@@ -72,7 +72,7 @@ export default function Player() {
         <div className="h-[10%] bg-black flex justify-between items-center text-white px-4">
 
             {/* Display of song name, image */}
-            <div onClick={displaySong} title='Click for song lyrics' className="hidden md:flex w-[20%] items-center gap-4 px-3 py-2 hover:bg-[#ffffff30] active:bg-[#ffffff40]">
+            <div onClick={displaySong} title='Click for song lyrics' className="hidden md:flex w-[20%] items-center gap-4 px-3 py-2 hover:bg-[#ffffff30] active:bg-[#ffffff40] cursor-pointer">
                 <img className="w-12" src={track.image} alt="Song Image" />
                 <div>
                     <p>{track.name}</p>
@@ -80,7 +80,7 @@ export default function Player() {
                 </div>
             </div>
             {/* On small screen */}
-            <div onClick={displaySong} title='Click for song lyrics' className='flex items-center md:hidden hover:bg-[#ffffff30] active:bg-[#ffffff40]'>
+            <div onClick={displaySong} title='Click for song lyrics' className='flex items-center md:hidden hover:bg-[#ffffff30] active:bg-[#ffffff40] cursor-pointer'>
                 <img className="w-10" src={track.image} alt="Song Image" />
             </div>
 

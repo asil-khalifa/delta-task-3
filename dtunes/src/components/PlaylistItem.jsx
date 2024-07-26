@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom"
 
-export default function PlaylistItem({ id, image, name, desc, likedSongs=false }) {
+export default function PlaylistItem({ id, image, name, desc, likedSongs=false, clickFunc=null }) {
     const navigate = useNavigate();
 
-    function clickFunc(){
+    if(!clickFunc) clickFunc = () => {
         if(!likedSongs) navigate(`/playlist/${id}`);
         else navigate('/liked-songs');
             

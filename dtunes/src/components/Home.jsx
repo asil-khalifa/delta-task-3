@@ -6,9 +6,8 @@ import { PlayerContext } from "../context/PlayerContext";
 import { assets } from "../assets/user/assets";
 import DisplaySongsUsers from "./DisplaySongsUsers";
 import UserItem from "./UserItem";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
-import { useLocation, useNavigate } from "react-router-dom";
+
 
 export default function Home({ setBgColor }) {
     const { songsData, playlistsData, track, searchQuery, usersData } = useContext(PlayerContext);
@@ -16,26 +15,6 @@ export default function Home({ setBgColor }) {
     //jwt:
     const { auth } = useAuth();
     const { loggedIn, user } = auth;
-    const axiosPrivate = useAxiosPrivate();
-
-    // async function testPrivate() {
-    //     try {
-    //         const response = await axiosPrivate.get('/api/users/testing/privatetest');
-    //         console.log(response.data);
-    //     } catch (err) {
-    //         console.log('RefreshToken expired, navigating to login screen')
-    //         navigate('/users/new', { state: { from: location }, replace: true })
-    //     }
-    // }
-
-    function createParty(){
-        
-    }
-    function joinParty() {
-
-    }
-    const navigate = useNavigate();
-    const location = useLocation();
 
     useEffect(() => {
         setBgColor('#121212');
@@ -76,11 +55,6 @@ export default function Home({ setBgColor }) {
                 {songsData.map((sd) => <SongItem key={uuid()} name={sd.name} desc={sd.desc} image={sd.image} id={sd._id} likes={sd.likes} dislikes={sd.dislikes} currentlyPlaying={track._id && track._id === sd._id} />)}
             </DisplaySongsUsers>
 
-            {/* <button onClick={testPrivate}>
-                Refresh: Test Private
-            </button> */}
-            <button onClick={createParty}>Create Party</button>
-            <button onClick={joinParty}>Join Party</button>
         </>
     )
 }

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import axios from 'axios';
 import { toast } from 'react-toastify'
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { SocketContext } from "./SocketContext";
 import axiosBase from "../api/axiosBase";
 
@@ -50,6 +50,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
     //See Normal.jsx, this helps to override songsData being empty 
     const [showNoSongs, setShowNoSongs] = useState(false);
 
+    const [searchParams, setSearchParams] = useSearchParams();
     //syncing:
 
     async function getSongs() {
@@ -70,8 +71,10 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                 }
 
                 try {
-                    // within a playlist:
                     let playlistIndex = curLocation.pathname.indexOf('playlist');
+                    let partiesIndex = curLocation.pathname.indexOf('parties');
+                    
+                    // within a playlist:
                     if (playlistIndex !== -1) {
                         let playlistId = curLocation.pathname.slice(playlistIndex + 'playlist'.length + 1);
                         //remove any unwanted extra stuff
@@ -86,6 +89,18 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         }
 
                     }
+                    //within a party && partying
+                    else if (partiesIndex!== -1 && searchParams.get('playlist1') && searchParams.get('playlist2')){
+                        let pId1 = searchParams.get('playlist1');
+                        let pId2 = searchParams.get('playlist2');
+
+                        let playlistsNeeded = playlistsData.filter(p => {
+                            return p._id === pId1 || p._id === pId2;
+                        })
+                        let songIds = [...playlistsNeeded[0].songs, ...playlistsNeeded[1].songs]
+                        songsAvailable =  songsAvailable.filter(song => songIds.find(sId => sId === song._id));
+                        console.log(songsAvailable);
+                    }
                     else {
                         setWithinPlaylist(false);
                     }
@@ -97,7 +112,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
 
                 //Only if track is not set, set it to the first available song
                 if (!Object.keys(track).length) {
-                    console.log('changing from here', track);
+                    // console.log('changing from here', track);
                     if (songsAvailable){
 
                         setTrack(t => {
@@ -213,7 +228,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
         if(!trackId) trackId = track?._id;
         if (!trackId) return;
 
-        console.log('sent trackId from here', trackId);
+        // console.log('sent trackId from here', trackId);
         socket.emit('sendSyncTrack', { trackId })
 
     }
@@ -251,9 +266,6 @@ export default function PlayerContextProvider({ children, backendUrl }) {
             }
         })
     }, [])
-    useEffect(() => {
-        console.log('track changed to: ', track);
-    }, [track]);
 
     // console.log('trackkk', track);
     //set duration to duration sent from server:

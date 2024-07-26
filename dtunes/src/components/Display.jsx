@@ -6,6 +6,8 @@ import Navbar from './Navbar'
 import { ToastContainer } from 'react-toastify'
 import DisplayLikedSongs from './DisplayLikedSongs'
 import DisplaySong from './DisplaySong'
+import DisplayParties from './DisplayParties'
+import DisplayParty from './DisplayParty'
 
 
 export default function Display({setCollapsedSidebar}) {
@@ -20,6 +22,8 @@ export default function Display({setCollapsedSidebar}) {
                 <Route path='/liked-songs' element={<DisplayLikedSongs setBgColor={setBgColor}/>}/>
                 <Route path='/playlist/:id' element={<DisplayPlaylist setBgColor={setBgColor} />} />
                 <Route path='/song/:id' element={<DisplaySong setBgColor={setBgColor} />} />
+                <Route path='/parties' element={<DisplayParties/>} />
+                <Route path='/parties/:id' element={<DisplayParty/>} />
                 <Route path='*' element={<Home setBgColor={setBgColor} />} />
             </Routes>
         </div>
