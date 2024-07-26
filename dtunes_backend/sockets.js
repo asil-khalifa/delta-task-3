@@ -90,7 +90,7 @@ class Party {
         this.sockets = [socket.id]; //contains socket Ids inside of it
         this.started = false;
         this.status = 'Waiting';
-        this.waitTimer(5); //!only set to integers (see waitTimer socket)
+        this.waitTimer(30); //!only set to integers (see waitTimer socket)
 
         io.to('partiesPage').emit('getParties', shortPartiesData());
 
@@ -110,7 +110,7 @@ class Party {
                     clearInterval(this.wait.timerId);
                     this.wait.ended = true;
                     this.status = 'Voting';
-                    this.voteTimer(60);
+                    this.voteTimer(30);
                 }
             }, 100),
             skip(){
@@ -206,7 +206,7 @@ class Party {
     }
 
     endParty() {
-        this.partyDetails.ending = 5;
+        this.partyDetails.ending = 10;
         this.status = 'Ending';
 
         this.partyDetails.endPartyId = setInterval(() => {

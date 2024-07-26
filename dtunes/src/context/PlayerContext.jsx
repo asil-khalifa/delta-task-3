@@ -62,7 +62,8 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                 // shuffleArray(songsAvailable);
 
                 //search:
-                if (searchQuery.term && searchQuery.filter === 'songs') {
+                if (searchQuery.term && searchQuery.filter === 'songs' && curLocation.pathname.indexOf('parties') === -1) {
+                    //if inside a party also, don't search
                     //lowercase both
                     songsAvailable = songsAvailable.filter(song => song.name.toLowerCase().indexOf(searchQuery.term) !== -1)
 
@@ -97,7 +98,7 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         let playlistsNeeded = playlistsData.filter(p => {
                             return p._id === pId1 || p._id === pId2;
                         })
-                        
+
                         let songIds;
                         //since I'm pre filling the other vote if only one vote, to avoid error 
                         if (playlistsNeeded.length === 1) songIds = [...playlistsNeeded[0].songs];
