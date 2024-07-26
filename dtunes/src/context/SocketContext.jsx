@@ -31,7 +31,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         socket.emit('authChange', { loggedIn, userId: user?._id });
-    }, [loggedIn, user?._id])
+    }, [loggedIn, user?._id, socket])
 
     //used by server for handling user reloading page when logged in:
     // useEffect(() => {
