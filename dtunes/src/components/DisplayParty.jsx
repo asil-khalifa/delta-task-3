@@ -133,10 +133,10 @@ export default function DisplayParty() {
             }
         }
     }, [partyDetails.status]);
-    const {songsData, track} = useContext(PlayerContext);
+    const { songsData, track, playWithId } = useContext(PlayerContext);
 
     let partyPlaylistData = [];
-    if (partyDetails.status === 'Partying'){
+    if (partyDetails.status === 'Partying') {
         partyPlaylistData = {
             name: 'Party',
             desc: 'Temporary playlist created from top 2 votes',
@@ -196,7 +196,7 @@ export default function DisplayParty() {
                     {/* Highlight the voted playlist; remove no. of songs, duration on phone screen */}
 
                 </>}
-            {partyDetails.status === 'Partying' &&
+            {partyDetails.status === 'Partying' && searchParams.get('playlist1') &&
                 <>
                     <h1 className="text-center text-3xl mt-4 mb-4">Party Mode:</h1>
 
@@ -211,7 +211,12 @@ export default function DisplayParty() {
 
                 </>}
 
-            {partyDetails.status === 'inactive' && <h1 className="text-center mt-5">This party has either ended or never happened.</h1>}
+            {partyDetails.status === 'inactive' &&
+                <>
+                    <h1 className="text-center mt-5">This party has either ended or never happened.</h1>
+                    {<button onClick={() => navigate('/parties', {replace: true})} className='px-4 py-1.5 mt-4 bg-green-500 hover:bg-green-600 active:bg-green-700 text-[15px] text-black font-semibold rounded-full'>Parties Page</button>}
+                </>
+            }
 
             {partyDetails.status === 'Waiting' || partyDetails.status === 'Voting' && !loggedIn && <h2>Login to vote in party or wait for it to begin</h2>}
         </>

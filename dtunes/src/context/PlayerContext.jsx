@@ -97,7 +97,12 @@ export default function PlayerContextProvider({ children, backendUrl }) {
                         let playlistsNeeded = playlistsData.filter(p => {
                             return p._id === pId1 || p._id === pId2;
                         })
-                        let songIds = [...playlistsNeeded[0].songs, ...playlistsNeeded[1].songs]
+                        
+                        let songIds;
+                        //since I'm pre filling the other vote if only one vote, to avoid error 
+                        if (playlistsNeeded.length === 1) songIds = [...playlistsNeeded[0].songs];
+                        else songIds = [...playlistsNeeded[0].songs, ...playlistsNeeded[1].songs];
+
                         songsAvailable =  songsAvailable.filter(song => songIds.find(sId => sId === song._id));
                         console.log(songsAvailable);
                     }
